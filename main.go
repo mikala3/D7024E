@@ -3,8 +3,10 @@ package main
 import "net"
 import "log"
 import "io"
+import "fmt"
 
 func main() {
+	fmt.Println("Starting node")
 	go dumbnode()
 }
 
