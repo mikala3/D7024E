@@ -13,7 +13,7 @@ FROM alpine:latest
 # $ docker build . -t kadlab
 
 RUN mkdir /app
-ADD ../. /app
+ADD /. /app
 WORKDIR /app
 RUN go build -o dumbnode .
 CMD ["/app/dumbnode"]
