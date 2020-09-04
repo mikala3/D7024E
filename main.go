@@ -7,15 +7,7 @@ import "fmt"
 
 func main() {
 	fmt.Println("Starting node")
-	go dumbnode()
-}
-
-func dumbnode() {
-	go conn()
-}
-
-func conn() {
-	ln, err := net.Listen("tcp", "8080")
+	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,4 +22,12 @@ func conn() {
 			c.Close()
 		}(conn)
 	}
+}
+
+func dumbnode() {
+	go conn()
+}
+
+func conn() {
+	
 }
