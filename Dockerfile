@@ -15,5 +15,5 @@ FROM alpine:latest
 RUN mkdir /app
 ADD /. /app
 WORKDIR /app
-RUN go build -o dumbnode .
-CMD ["/app/dumbnode"]
+RUN go build -o main .
+CMD ["/app/main"]
