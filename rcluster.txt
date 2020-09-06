@@ -1,4 +1,3 @@
 sudo docker service rm test
 sudo docker service rm swarm_kademliaNodes
-sudo docker node demote d7024e
-sudo docker node rm d7024e
+sudo docker swarm leave --force
