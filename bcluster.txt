@@ -2,6 +2,3 @@ sudo docker build . -t kadlab
 sudo docker run -d kadlabsudo
 sudo docker swarm init
 sudo docker stack deploy --compose-file docker-compose.yml swarm
-sudo docker service create --replicas 5 --name test alpine ping google.com
-sudo docker service ps
-sudo docker service ls

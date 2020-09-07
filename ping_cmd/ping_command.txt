@@ -1,0 +1,1 @@
+sudo docker exec -it name1 ping name2
