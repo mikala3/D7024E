@@ -113,6 +113,7 @@ func (network *Network) SendFindDataMessage(hash string) {
 	// TODO
 }
 
+//Needs more work later, need to match with data to find if we are close enough with hash
 func (network *Network) SendStoreMessage(data []byte, contact *Contact) {
 	// TODO
 	if network.rt.me.ID == contact.ID {
