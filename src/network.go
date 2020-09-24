@@ -1,4 +1,4 @@
-package kademlia
+package main
 
 import (
 	//"os/exec"
@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 	"bytes"
+	"fmt"
 )
 
 type Network struct {
@@ -45,6 +46,7 @@ func (network *Network) ListenToIp(ip string, port int) {
 }
 
 func (network *Network) Listen(port int) {
+	fmt.Println("listen")
 	listenip := ":" + strconv.Itoa(port)
 	ln, err := net.Listen("tcp", listenip)
 	if err != nil {
