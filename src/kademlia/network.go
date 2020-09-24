@@ -1,4 +1,4 @@
-package d7024e
+package kademlia
 
 import (
 	//"os/exec"
@@ -10,11 +10,42 @@ import (
 )
 
 type Network struct {
-	rt RoutingTable
+	rt *RoutingTable
 }
 
-func (network *Network) Listen(ip string, port int) {
+// NewRoutingTable returns a new instance of a RoutingTable
+func NewNetwork(rt *RoutingTable) *Network {
+	network := &Network{}
+	network.rt = rt
+	return network
+}
+
+func (network *Network) ListenToIp(ip string, port int) {
 	listenip := ip + ":" + strconv.Itoa(port)
+	ln, err := net.Listen("tcp", listenip)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ln.Close()
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		go func(c net.Conn) { //Connection handler
+			data := make([]byte, 128)
+			_, err := c.Read(data) //Read data sent
+			if err != nil {
+				panic(err)
+			}
+			go network.ListenDataHandler(data) //Handle data
+			c.Close()
+		}(conn)
+	}
+}
+
+func (network *Network) Listen(port int) {
+	listenip := ":" + strconv.Itoa(port)
 	ln, err := net.Listen("tcp", listenip)
 	if err != nil {
 		log.Fatal(err)
@@ -61,6 +92,22 @@ func (network *Network) ListenDataHandler(b []byte) {
 	} else if bytes.Contains(b, []byte("Data<")) {
 		//var newdata []byte = b[5:]
 		//newstring := string(newdata)
+	} else if bytes.Contains(b, []byte("Join<")) {
+		var newdata []byte = b[5:]
+		newstring := string(newdata)
+		stringarr := strings.Split(",",newstring[8:(len(newstring)-1)])
+		id := stringarr[0]
+		address := stringarr[1]
+		network.rt.AddContact(NewContact(NewKademliaID(id), address))
+		network.SendJoinAcceptedMessage(address)
+	} else if bytes.Contains(b, []byte("JoinAccepted<")) {
+		var newdata []byte = b[13:]
+		newstring := string(newdata)
+		stringarr := strings.Split(",",newstring[8:(len(newstring)-1)])
+		id := stringarr[0]
+		address := stringarr[1]
+		network.rt.AddContact(NewContact(NewKademliaID(id), address))
+
 	}
 }
 
@@ -147,4 +194,28 @@ func (network *Network) SendStoreMessage(data []byte, contact *Contact) {
 		} 
 	}
 
+}
+
+func (network *Network) SendJoinMessage(ip string) {
+	conn, err := net.Dial("tcp", ip)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	if _, err := conn.Write([]byte("Join<"+network.rt.me.String())); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (network *Network) SendJoinAcceptedMessage(ip string) {
+	conn, err := net.Dial("tcp", ip)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	if _, err := conn.Write([]byte("JoinAccepted<"+network.rt.me.String())); err != nil {
+		log.Fatal(err)
+	}
 }
