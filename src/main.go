@@ -1,9 +1,10 @@
 package main
 
 // import "net"
-// import "log"
+import "log"
 // import "io"
 import "fmt"
+import "strconv"
 
 // main function 
 func command(n *Network) { 
@@ -22,7 +23,7 @@ func command(n *Network) {
 			fmt.Scanln(&ip) 
 			n.SendJoinMessage(ip)
 		} else if (cmd == "-ping") {
-			fmt.Println("Not implemented ") 
+			n.SendPingAll();
 		} else if (cmd == "-put") {
 			fmt.Println("Not implemented ") 
 		} else if (cmd == "-get") {
@@ -50,11 +51,19 @@ func main() {
 	// 		c.Close()
 	// 	}(conn)
 	// }
+	fmt.Println("Enter port: ") 
+  
+	var port string 
+	
+	fmt.Scanln(&port) 
 	fmt.Println("jada")
-	rt := NewRoutingTable(NewContact(NewKademliaID("FFFFFFFF00000000000000000000000000000000"), "localhost:8000"))
+	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), "localhost:"+port))
 	nt := NewNetwork(rt)
 
-	go nt.Listen(8080)
+	iport, err := strconv.Atoi(port)
+	if err != nil {
+		log.Fatal(err)
+	}
+	go nt.Listen(iport)
 	command(nt)
-	fmt.Println("jada2")
 }
