@@ -105,11 +105,30 @@ func (network *Network) ListenDataHandler(b []byte) {
 		var newdata []byte = b[5:]
 		newstring := string(newdata)
 		fmt.Println(newstring)
-		stringarr := strings.Split(newstring[8:(len(newstring)-1)], ",")
+		split := strings.Split(newstring, ">")
+		stringarr := strings.Split(split[0][8:(len(split[0])-1)], ",")
+		stringarr2 := strings.Split(split[1][8:(len(split[1])-1)], ",")
 		id := stringarr[0]
 		address := strings.Split(stringarr[1][1:], ")")
+		id2 := stringarr2[0]
+		address2 := strings.Split(stringarr2[1][1:], ")")
 		contact := NewContact(NewKademliaID(id),address[0])
-		network.SendFindContactMessage(&contact)
+		contact2 := NewContact(NewKademliaID(id2),address2[0])
+		network.SendFindContactMessage(&contact, &contact2)
+	} else if bytes.Contains(b, []byte("FindAccepted<")) {
+		var newdata []byte = b[13:]
+		newstring := string(newdata)
+		fmt.Println(newstring)
+		split := strings.Split(newstring, ">")
+		stringarr := strings.Split(split[0][8:(len(split[0])-1)], ",")
+		stringarr2 := strings.Split(split[1][8:(len(split[1])-1)], ",")
+		id := stringarr[0]
+		address := strings.Split(stringarr[1][1:], ")")
+		id2 := stringarr2[0]
+		address2 := strings.Split(stringarr2[1][1:], ")")
+		contact := NewContact(NewKademliaID(id),address[0])
+		contact2 := NewContact(NewKademliaID(id2),address2[0])
+		network.SendFindAccepted(&contact, &contact2)
 	} else if bytes.Contains(b, []byte("FindData<")) {
 		//var newdata []byte = b[9:]
 		//newstring := string(newdata)
@@ -199,10 +218,31 @@ func (network *Network) SendPingAll() {
 	}
 }
 
-func (network *Network) SendFindContactMessage(contact *Contact) {
+func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 	if network.rt.me.ID.Equals(contact.ID) {
-		//We are the node that is trying to be found
+		//Ping accepted recivied, ping bounced back.
+		fmt.Println("Find bounced back from "+sender.String())
+		network.rt.AddContact(*sender)
+	} else {
+		coid := network.rt.FindClosestContacts(contact.ID, 3)
+		for co := 0; co < len(coid); co++ {
+			conn, err := net.Dial("tcp", coid[co].Address)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer conn.Close()
 
+			if _, err := conn.Write([]byte("FindAccepted<"+contact.String()+">"+sender.String())); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+}
+
+func (network *Network) SendFindContactMessage(contact *Contact, sender *Contact) {
+	if network.rt.me.ID.Equals(contact.ID) {
+		fmt.Println("Lookup recivied from "+sender.String())
+		network.SendFindAccepted(sender, &network.rt.me)
 	}
 	coid := network.rt.FindClosestContacts(contact.ID, 3)
 	for co := 0; co < len(coid); co++ {
@@ -212,7 +252,7 @@ func (network *Network) SendFindContactMessage(contact *Contact) {
 		}
 		defer conn.Close()
 
-		if _, err := conn.Write([]byte("Find<"+contact.String())); err != nil {
+		if _, err := conn.Write([]byte("Find<"+contact.String()+">"+network.rt.me.String())); err != nil {
 			log.Fatal(err)
 		}
 	}
