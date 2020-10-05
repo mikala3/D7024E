@@ -24,6 +24,15 @@ func command(n *Network) {
 			n.SendJoinMessage(ip)
 		} else if (cmd == "-ping") {
 			n.SendPingAll();
+		} else if (cmd == "-lookup") {
+			fmt.Println("Enter id: ") 
+			var id string 
+			fmt.Scanln(&id) 
+			fmt.Println("Enter ip: ") 
+			var ip string 
+			fmt.Scanln(&ip)
+			var contact = NewContact(NewKademliaID(id),ip)
+			n.SendFindContactMessage(&contact, &n.rt.me)
 		} else if (cmd == "-put") {
 			fmt.Println("Not implemented ") 
 		} else if (cmd == "-get") {
@@ -58,12 +67,19 @@ func main() {
 	fmt.Scanln(&port) 
 	fmt.Println("jada")
 	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), "localhost:"+port))
-	nt := NewNetwork(rt)
+
+	kc := make(chan []byte)
+	ex := make(chan []byte)
+	nt := NewNetwork(rt,kc,ex)
+
+	ka := NewKademlia(nt)
 
 	iport, err := strconv.Atoi(port)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	go nt.Listen(iport)
+	go ka.DataHandler()
 	command(nt)
 }

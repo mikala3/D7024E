@@ -2,22 +2,24 @@ package main
 
 import (
 	//"os/exec"
-	"strings"
 	"net"
 	"log"
 	"strconv"
-	"bytes"
 	"fmt"
 )
 
 type Network struct {
 	rt *RoutingTable
+	kademliaChannel chan []byte
+	externalChannel chan []byte
 }
 
-// NewRoutingTable returns a new instance of a RoutingTable
-func NewNetwork(rt *RoutingTable) *Network {
+// NewNetwork returns a new instance of a RNetwork
+func NewNetwork(rt *RoutingTable, kc chan []byte, ex chan []byte) *Network {
 	network := &Network{}
 	network.rt = rt
+	network.kademliaChannel = kc
+	network.externalChannel = ex
 	return network
 }
 
@@ -39,7 +41,8 @@ func (network *Network) ListenToIp(ip string, port int) {
 			if err != nil {
 				panic(err)
 			}
-			go network.ListenDataHandler(data) //Handle data
+			//msg := <- network.externalChannel
+			network.kademliaChannel <- data
 			c.Close()
 		}(conn)
 	}
@@ -59,111 +62,26 @@ func (network *Network) Listen(port int) {
 			log.Fatal(err)
 		}
 		go func(c net.Conn) { //Connection handler
-			data := make([]byte, 128)
+			data := make([]byte, 256)
 			_, err := c.Read(data) //Read data sent
 			if err != nil {
 				panic(err)
 			}
-			go network.ListenDataHandler(data) //Handle data
+			//msg := <- network.externalChannel
+			network.kademliaChannel <- data //Handle data
 			c.Close()
 		}(conn)
 	}
 }
 
-func (network *Network) ListenDataHandler(b []byte) {
-	if bytes.Contains(b, []byte("Ping<")) {
-		var newdata []byte = b[5:]
-		newstring := string(newdata)
-		fmt.Println(newstring)
-		split := strings.Split(newstring,">")
-		stringarr := strings.Split(split[0][8:(len(split[0])-1)],",")
-		stringarr2 := strings.Split(split[1][8:(len(split[1])-1)],",")
-		id := stringarr[0]
-		address := strings.Split(stringarr[1][1:], ")")
-		id2 := stringarr2[0]
-		address2 := strings.Split(stringarr2[1][1:], ")")
-		contact := NewContact(NewKademliaID(id),address[0])
-		contact2 := NewContact(NewKademliaID(id2),address2[0])
-		network.SendPingMessage(&contact, &contact2)
-		//newstring = contact(id, address)
-	} else if bytes.Contains(b, []byte("PingAccepted<")) {
-		var newdata []byte = b[13:]
-		newstring := string(newdata)
-		fmt.Println(newstring)
-		split := strings.Split(newstring, ">")
-		stringarr := strings.Split(split[0][8:(len(split[0])-1)], ",")
-		stringarr2 := strings.Split(split[1][8:(len(split[1])-1)], ",")
-		id := stringarr[0]
-		address := strings.Split(stringarr[1][1:], ")")
-		id2 := stringarr2[0]
-		address2 := strings.Split(stringarr2[1][1:], ")")
-		contact := NewContact(NewKademliaID(id),address[0])
-		contact2 := NewContact(NewKademliaID(id2),address2[0])
-		network.SendPingAccepted(&contact, &contact2)
-		//newstring = contact(id, address)
-	} else if bytes.Contains(b, []byte("Find<")) {
-		var newdata []byte = b[5:]
-		newstring := string(newdata)
-		fmt.Println(newstring)
-		split := strings.Split(newstring, ">")
-		stringarr := strings.Split(split[0][8:(len(split[0])-1)], ",")
-		stringarr2 := strings.Split(split[1][8:(len(split[1])-1)], ",")
-		id := stringarr[0]
-		address := strings.Split(stringarr[1][1:], ")")
-		id2 := stringarr2[0]
-		address2 := strings.Split(stringarr2[1][1:], ")")
-		contact := NewContact(NewKademliaID(id),address[0])
-		contact2 := NewContact(NewKademliaID(id2),address2[0])
-		network.SendFindContactMessage(&contact, &contact2)
-	} else if bytes.Contains(b, []byte("FindAccepted<")) {
-		var newdata []byte = b[13:]
-		newstring := string(newdata)
-		fmt.Println(newstring)
-		split := strings.Split(newstring, ">")
-		stringarr := strings.Split(split[0][8:(len(split[0])-1)], ",")
-		stringarr2 := strings.Split(split[1][8:(len(split[1])-1)], ",")
-		id := stringarr[0]
-		address := strings.Split(stringarr[1][1:], ")")
-		id2 := stringarr2[0]
-		address2 := strings.Split(stringarr2[1][1:], ")")
-		contact := NewContact(NewKademliaID(id),address[0])
-		contact2 := NewContact(NewKademliaID(id2),address2[0])
-		network.SendFindAccepted(&contact, &contact2)
-	} else if bytes.Contains(b, []byte("FindData<")) {
-		//var newdata []byte = b[9:]
-		//newstring := string(newdata)
-	} else if bytes.Contains(b, []byte("Data<")) {
-		//var newdata []byte = b[5:]
-		//newstring := string(newdata)
-	} else if bytes.Contains(b, []byte("Join<")) {
-		var newdata []byte = b[5:]
-		newstring := string(newdata)
-		fmt.Println(newstring)
-		stringarr := strings.Split(newstring[8:(len(newstring)-1)], ",")
-		id := stringarr[0]
-		address := strings.Split(stringarr[1][1:], ")")
-		network.rt.AddContact(NewContact(NewKademliaID(id), address[0]))
-		network.SendJoinAcceptedMessage(address[0])
-	} else if bytes.Contains(b, []byte("JoinAccepted<")) {
-		var newdata []byte = b[13:]
-		newstring := string(newdata)
-		fmt.Println(newstring)
-		stringarr := strings.Split(newstring[8:(len(newstring)-1)], ",")
-		id := stringarr[0]
-		address := strings.Split(stringarr[1][1:], ")")
-		network.rt.AddContact(NewContact(NewKademliaID(id), address[0]))
 
-	} else {
-		fmt.Println("Something incorect with incoming message!")
-	}
-}
 //fmt.Println(strings.TrimSuffix("localhost:8080)", ")"))
 func (network *Network) SendPingAccepted(contact *Contact, sender *Contact) {
 	if network.rt.me.ID.Equals(contact.ID) {
 		//Ping accepted recivied, ping bounced back.
 		fmt.Println("Ping bounced back from "+sender.String())
 	} else {
-		coid := network.rt.FindClosestContacts(contact.ID, 3)
+		coid := network.rt.FindClosestContacts(contact.ID, 1)
 		for co := 0; co < len(coid); co++ {
 			conn, err := net.Dial("tcp", coid[co].Address)
 			if err != nil {
@@ -174,6 +92,8 @@ func (network *Network) SendPingAccepted(contact *Contact, sender *Contact) {
 			if _, err := conn.Write([]byte("PingAccepted<"+contact.String()+">"+sender.String())); err != nil {
 				log.Fatal(err)
 			}
+			// network.externalChannel <- ([]byte("PingAccepted<"+contact.String()+">"+sender.String()))
+			// conn.Close()
 		}
 	}
 }
@@ -183,7 +103,7 @@ func (network *Network) SendPingMessage(contact *Contact, sender *Contact) {
 		fmt.Println("Ping recivied from "+sender.String())
 		network.SendPingAccepted(sender, &network.rt.me)
 	} else {
-		coid := network.rt.FindClosestContacts(contact.ID, 3)
+		coid := network.rt.FindClosestContacts(contact.ID, 1)
 		for co := 0; co < len(coid); co++ {
 			conn, err := net.Dial("tcp", coid[co].Address)
 			if err != nil {
@@ -194,6 +114,8 @@ func (network *Network) SendPingMessage(contact *Contact, sender *Contact) {
 			if _, err := conn.Write([]byte("Ping<"+contact.String()+">"+sender.String())); err != nil {
 				log.Fatal(err)
 			}
+			// network.externalChannel <- ([]byte("Ping<"+contact.String()+">"+sender.String()))
+			// conn.Close()
 		}
 	}
 }
@@ -215,6 +137,8 @@ func (network *Network) SendPingAll() {
 		if _, err := conn.Write([]byte("Ping<"+coid[co].String()+">"+network.rt.me.String())); err != nil {
 			log.Fatal(err)
 		}
+		// network.externalChannel <- ([]byte("Ping<"+coid[co].String()+">"+network.rt.me.String()))
+		// conn.Close()
 	}
 }
 
@@ -224,7 +148,7 @@ func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 		fmt.Println("Find bounced back from "+sender.String())
 		network.rt.AddContact(*sender)
 	} else {
-		coid := network.rt.FindClosestContacts(contact.ID, 3)
+		coid := network.rt.FindClosestContacts(contact.ID, 1)
 		for co := 0; co < len(coid); co++ {
 			conn, err := net.Dial("tcp", coid[co].Address)
 			if err != nil {
@@ -235,6 +159,8 @@ func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 			if _, err := conn.Write([]byte("FindAccepted<"+contact.String()+">"+sender.String())); err != nil {
 				log.Fatal(err)
 			}
+			// network.externalChannel <- ([]byte("FindAccepted<"+contact.String()+">"+sender.String()))
+			// conn.Close()
 		}
 	}
 }
@@ -243,21 +169,22 @@ func (network *Network) SendFindContactMessage(contact *Contact, sender *Contact
 	if network.rt.me.ID.Equals(contact.ID) {
 		fmt.Println("Lookup recivied from "+sender.String())
 		network.SendFindAccepted(sender, &network.rt.me)
-	}
-	coid := network.rt.FindClosestContacts(contact.ID, 3)
-	for co := 0; co < len(coid); co++ {
-		conn, err := net.Dial("tcp", coid[co].Address)
-		if err != nil {
-			log.Fatal(err)
+	} else {
+		coid := network.rt.FindClosestContacts(contact.ID, 1)
+		for co := 0; co < len(coid); co++ {
+			conn, err := net.Dial("tcp", coid[co].Address)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer conn.Close()
+
+			if _, err := conn.Write([]byte("Find<"+contact.String()+">"+sender.String())); err != nil {
+				log.Fatal(err)
+			}
+			// network.externalChannel <- ([]byte("Find<"+contact.String()+">"+sender.String()))
+			// conn.Close()
 		}
-		defer conn.Close()
-
-		if _, err := conn.Write([]byte("Find<"+contact.String()+">"+network.rt.me.String())); err != nil {
-			log.Fatal(err)
-		}
 	}
-
-
 }
 
 func (network *Network) SendFindDataMessage(hash string) {
@@ -282,6 +209,8 @@ func (network *Network) SendStoreMessage(data []byte, contact *Contact) {
 			if _, err := conn.Write([]byte("Store<"+contact.String()+dataString)); err != nil {
 				log.Fatal(err)
 			}
+			// network.externalChannel <- ([]byte("Store<"+contact.String()+dataString))
+			// conn.Close()
 		} 
 	} else {
 		coid := network.rt.FindClosestContacts(contact.ID, 20)
@@ -295,6 +224,8 @@ func (network *Network) SendStoreMessage(data []byte, contact *Contact) {
 			if _, err := conn.Write([]byte("Find<"+contact.String())); err != nil {
 				log.Fatal(err)
 			}
+			// network.externalChannel <- ([]byte("Find<"+contact.String()))
+			// conn.Close()
 		} 
 	}
 
@@ -308,8 +239,10 @@ func (network *Network) SendJoinMessage(ip string) {
 	defer conn.Close()
 
 	if _, err := conn.Write([]byte("Join<"+network.rt.me.String())); err != nil {
-		log.Fatal(err)
+	 	log.Fatal(err)
 	}
+	// network.externalChannel <- ([]byte("Join<"+network.rt.me.String()))
+	// conn.Close()
 }
 
 func (network *Network) SendJoinAcceptedMessage(ip string) {
@@ -322,4 +255,6 @@ func (network *Network) SendJoinAcceptedMessage(ip string) {
 	if _, err := conn.Write([]byte("JoinAccepted<"+network.rt.me.String())); err != nil {
 		log.Fatal(err)
 	}
+	// network.externalChannel <- ([]byte("JoinAccepted<"+network.rt.me.String()))
+	// conn.Close()
 }
