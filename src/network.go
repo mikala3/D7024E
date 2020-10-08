@@ -196,24 +196,21 @@ func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 	}
 }
 
-func (network *Network) SendFindContactMessage(contact *Contact, sender *Contact) {
+func (network *Network) SendFindContactMessage(contact *Contact, recivier *Contact, sender *Contact) {
 	if (network.testing) {
 		network.externalChannel <- ([]byte("Find<"+contact.String()+">"+sender.String()))
 	} else {
-		coid := network.rt.FindClosestContacts(contact.ID, alpha)
-		for co := 0; co < len(coid); co++ {
-			conn, err := net.Dial("tcp", coid[co].Address)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer conn.Close()
-
-			if _, err := conn.Write([]byte("Find<"+contact.String()+">"+sender.String())); err != nil {
-				log.Fatal(err)
-			}
-			// network.externalChannel <- ([]byte("Find<"+contact.String()+">"+sender.String()))
-			// conn.Close()
+		conn, err := net.Dial("tcp", recivier.Address)
+		if err != nil {
+			log.Fatal(err)
 		}
+		defer conn.Close()
+
+		if _, err := conn.Write([]byte("Find<"+contact.String()+">"+sender.String())); err != nil {
+			log.Fatal(err)
+		}
+		// network.externalChannel <- ([]byte("Find<"+contact.String()+">"+sender.String()))
+		// conn.Close()
 	}
 }
 

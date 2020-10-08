@@ -7,7 +7,7 @@ import "fmt"
 import "strconv"
 
 // main function 
-func command(n *Network) { 
+func command(k *Kademlia) { 
 	fmt.Println("cmd")
 	for {
 		fmt.Println("Enter command (-h for help): ") 
@@ -21,9 +21,9 @@ func command(n *Network) {
 			fmt.Println("Enter ip: ") 
 			var ip string 
 			fmt.Scanln(&ip) 
-			n.SendJoinMessage(ip)
+			k.nt.SendJoinMessage(ip)
 		} else if (cmd == "-ping") {
-			n.SendPingAll();
+			k.nt.SendPingAll();
 		} else if (cmd == "-lookup") {
 			fmt.Println("Enter id: ") 
 			var id string 
@@ -32,7 +32,7 @@ func command(n *Network) {
 			var ip string 
 			fmt.Scanln(&ip)
 			var contact = NewContact(NewKademliaID(id),ip)
-			n.SendFindContactMessage(&contact, &n.rt.me)
+			k.LookupContact(&contact, &k.nt.rt.me)
 		} else if (cmd == "-put") {
 			fmt.Println("Not implemented ") 
 		} else if (cmd == "-get") {
@@ -81,5 +81,5 @@ func main() {
 
 	go nt.Listen(iport)
 	go ka.DataHandler()
-	command(nt)
+	command(ka)
 }
