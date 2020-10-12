@@ -40,8 +40,7 @@ func (kademlia *Kademlia) DataHandler() {
 				stringarr := strings.Split(split[co][8:(len(split[co])-1)], ",")
 				id := stringarr[0]
 				address := strings.Split(stringarr[1][1:], ")")
-				contactlist[co-2] = id
-				contactlist[co-1] = address[0]
+				contactlist = append(contactlist,id,address[0])
 			}
 			kademlia.LookupContactAccepted(&contact, &contact2, contactlist)
 		} else if bytes.Contains(b, []byte("FindData<")) {

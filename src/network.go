@@ -38,7 +38,7 @@ func (network *Network) ListenToIp(ip string, port int) {
 			log.Fatal(err)
 		}
 		go func(c net.Conn) { //Connection handler
-			data := make([]byte, 128)
+			data := make([]byte, 1024)
 			_, err := c.Read(data) //Read data sent
 			if err != nil {
 				panic(err)
@@ -64,7 +64,7 @@ func (network *Network) Listen(port int) {
 			log.Fatal(err)
 		}
 		go func(c net.Conn) { //Connection handler
-			data := make([]byte, 256)
+			data := make([]byte, 1024)
 			_, err := c.Read(data) //Read data sent
 			if err != nil {
 				panic(err)

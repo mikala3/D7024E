@@ -17,6 +17,8 @@ type Kademlia struct {
 func NewKademlia(nt *Network) *Kademlia {
 	kademlia := &Kademlia{}
 	kademlia.nt = nt
+	kademlia.firstrun = true;
+	kademlia.index = 0;
 	return kademlia
 }
 
@@ -50,12 +52,14 @@ func (kademlia *Kademlia) LookupContactAccepted(target *Contact, sender *Contact
 			id := contacts[co]
 			address := contacts[co+1]
 			contact := NewContact(NewKademliaID(id),address)
-			kademlia.nt.rt.AddContact(contact)
 			kademlia.shortlist = append(kademlia.shortlist, contact)
 			distanceclosest := target.ID.CalcDistance(kademlia.closestContact.ID)
 			distancecontact := target.ID.CalcDistance(contact.ID)
 			if (distancecontact.Less(distanceclosest)){
 				kademlia.closestContact = &contact
+			}
+			if (!contact.ID.Equals(kademlia.nt.rt.me.ID)){ //Needs to be changed so that it pings contacts in bucket and updates accordingly
+				kademlia.nt.rt.AddContact(contact)
 			}
 		}
 	} else if (kademlia.index == alpha) { //Done with parallel search
