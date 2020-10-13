@@ -168,6 +168,11 @@ func (network *Network) SendPingAll() {
 	}
 }
 
+// NEW FORMAT FOR FIND, OLD WAS REEEEEAAAAALLLYYYY BAD
+// Find<contact(SEARCHED)>contact(SENDER)
+// FindAccepted<contact(SEARCHED)>contact(SENDER)>contact(BUCKET1)>contact(BUCKET2) ...
+// Recivier is no longer included since they are directly connected, the sender is still sent by function call to network.
+
 func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 	if (network.testing) {
 		coid := network.rt.FindClosestContacts(contact.ID, alpha)
@@ -175,7 +180,7 @@ func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 		for co := 0; co < len(coid); co++ {
 			senderstring = senderstring + coid[co].String() +">"
 		}
-		network.externalChannel <- ([]byte("FindAccepted<"+sender.String()+">"+contact.String()+">"+senderstring[: (len(senderstring)-1) ]))
+		network.externalChannel <- ([]byte("FindAccepted<"+contact.String()+">"+network.rt.me.String()+">"+senderstring[: (len(senderstring)-1) ]))
 	} else {
 		coid := network.rt.FindClosestContacts(contact.ID, alpha)
 		conn, err := net.Dial("tcp", sender.Address)
@@ -188,7 +193,7 @@ func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 		}
 		defer conn.Close()
 
-		if _, err := conn.Write([]byte("FindAccepted<"+sender.String()+">"+contact.String()+">"+senderstring[: (len(senderstring)-1) ])); err != nil {
+		if _, err := conn.Write([]byte("FindAccepted<"+contact.String()+">"+network.rt.me.String()+">"+senderstring[: (len(senderstring)-1) ])); err != nil {
 			log.Fatal(err)
 		}
 		// network.externalChannel <- ([]byte("FindAccepted<"+sender.String()+">"+contact.String()+">"+senderstring[: (len(senderstring)-1) ]))
@@ -198,7 +203,7 @@ func (network *Network) SendFindAccepted(contact *Contact, sender *Contact) {
 
 func (network *Network) SendFindContactMessage(contact *Contact, recivier *Contact, sender *Contact) {
 	if (network.testing) {
-		network.externalChannel <- ([]byte("Find<"+contact.String()+">"+sender.String()))
+		network.externalChannel <- ([]byte("Find<"+contact.String()+">"+network.rt.me.String()))
 	} else {
 		conn, err := net.Dial("tcp", recivier.Address)
 		if err != nil {
@@ -206,7 +211,7 @@ func (network *Network) SendFindContactMessage(contact *Contact, recivier *Conta
 		}
 		defer conn.Close()
 
-		if _, err := conn.Write([]byte("Find<"+contact.String()+">"+sender.String())); err != nil {
+		if _, err := conn.Write([]byte("Find<"+contact.String()+">"+network.rt.me.String())); err != nil {
 			log.Fatal(err)
 		}
 		// network.externalChannel <- ([]byte("Find<"+contact.String()+">"+sender.String()))

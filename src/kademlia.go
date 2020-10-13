@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 const alpha = 3
 const k = 4
 
@@ -10,6 +14,7 @@ type Kademlia struct {
 	shortlist []Contact
 	alreadycontacted []Contact
 	index int
+	kaalpha int
 	firstrun bool
 }
 
@@ -19,6 +24,7 @@ func NewKademlia(nt *Network) *Kademlia {
 	kademlia.nt = nt
 	kademlia.firstrun = true;
 	kademlia.index = 0;
+	kademlia.kaalpha = 0;
 	return kademlia
 }
 
@@ -28,12 +34,15 @@ func (kademlia *Kademlia) LookupContact(target *Contact, sender *Contact) {
 		kademlia.firstrun = false
 		kademlia.alreadycontacted = kademlia.alreadycontacted[:0]
 		kademlia.shortlist = kademlia.nt.rt.FindClosestContacts(target.ID, alpha)
+		kademlia.kaalpha = len(kademlia.shortlist)
 		kademlia.closestContact = &kademlia.shortlist[0]
+		kademlia.oldclosestContact = &kademlia.shortlist[0]
 		for co := 0; co < len(kademlia.shortlist); co++ {
 			kademlia.nt.SendFindContactMessage(target, &kademlia.shortlist[co], sender)
+			kademlia.alreadycontacted = append(kademlia.alreadycontacted, kademlia.shortlist[co])
 		}
-		kademlia.index = kademlia.index + 1
 	} else if (len(kademlia.shortlist) < k) {
+		kademlia.kaalpha = len(kademlia.shortlist) - len(kademlia.alreadycontacted)
 		for co := 0; co < len(kademlia.shortlist); co++ {
 			if (!Contains(kademlia.alreadycontacted, kademlia.shortlist[co])) {
 				kademlia.nt.SendFindContactMessage(target, &kademlia.shortlist[co], sender)
@@ -62,18 +71,30 @@ func (kademlia *Kademlia) LookupContactAccepted(target *Contact, sender *Contact
 				kademlia.nt.rt.AddContact(contact)
 			}
 		}
-	} else if (kademlia.index == alpha) { //Done with parallel search
+	} 
+	if ((kademlia.index == alpha) || (kademlia.index == kademlia.kaalpha)) { //Done with parallel search
 		if (kademlia.closestContact.ID.Equals(kademlia.oldclosestContact.ID)) { 
 			//Ids match, no new closer node found during parallel search
+			fmt.Println("Done with parallel")
 			kademlia.index = 0
+			kademlia.kaalpha = 0
 			kademlia.firstrun = true
 		} else { //Continue with parallel searches
+			fmt.Println("Starting next parallel")
 			kademlia.index = 0
 			kademlia.oldclosestContact = kademlia.closestContact
 			kademlia.LookupContact(target,sender)
 		}
 	} else { //Done with lookup
+		fmt.Println("Done with parallel: else")
 		kademlia.index = 0
+		kademlia.kaalpha = 0
+		kademlia.firstrun = true
+	}
+	if (ContainsSame(kademlia.shortlist,kademlia.alreadycontacted)) {
+		fmt.Println("Done with parallel")
+		kademlia.index = 0
+		kademlia.kaalpha = 0
 		kademlia.firstrun = true
 	}
 }
@@ -97,6 +118,15 @@ func (kademlia *Kademlia) Join(ip string, id string) {
 
 func (kademlia *Kademlia) JoinAccepted(ip string, id string) {
 	kademlia.nt.rt.AddContact(NewContact(NewKademliaID(id), ip))
+}
+
+func ContainsSame(a []Contact, x []Contact) bool {
+    for _, n := range x {
+        if Contains(a,n) {
+            return true
+        }
+    }
+    return false
 }
 
 func Contains(a []Contact, x Contact) bool {

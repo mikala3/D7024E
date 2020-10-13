@@ -21,7 +21,7 @@ func (kademlia *Kademlia) DataHandler() {
 			//newstring = contact(id, address)
 		} else if bytes.Contains(b, []byte("Find<")) {
 			contactarr := parseTwoContacts(b,5);
-			kademlia.nt.SendFindAccepted(&contactarr[0], &contactarr[1])
+			go kademlia.nt.SendFindAccepted(&contactarr[0], &contactarr[1])
 		} else if bytes.Contains(b, []byte("FindAccepted<")) {
 			var newdata []byte = b[13:]
 			newstring := string(newdata)
@@ -42,7 +42,7 @@ func (kademlia *Kademlia) DataHandler() {
 				address := strings.Split(stringarr[1][1:], ")")
 				contactlist = append(contactlist,id,address[0])
 			}
-			kademlia.LookupContactAccepted(&contact, &contact2, contactlist)
+			go kademlia.LookupContactAccepted(&contact, &contact2, contactlist)
 		} else if bytes.Contains(b, []byte("FindData<")) {
 			//var newdata []byte = b[9:]
 			//newstring := string(newdata)
@@ -56,7 +56,7 @@ func (kademlia *Kademlia) DataHandler() {
 			stringarr := strings.Split(newstring[8:(len(newstring)-1)], ",")
 			id := stringarr[0]
 			address := strings.Split(stringarr[1][1:], ")")
-			kademlia.Join(address[0], id)
+			go kademlia.Join(address[0], id)
 		} else if bytes.Contains(b, []byte("JoinAccepted<")) {
 			var newdata []byte = b[13:]
 			newstring := string(newdata)
@@ -64,7 +64,7 @@ func (kademlia *Kademlia) DataHandler() {
 			stringarr := strings.Split(newstring[8:(len(newstring)-1)], ",")
 			id := stringarr[0]
 			address := strings.Split(stringarr[1][1:], ")")
-			kademlia.JoinAccepted(address[0], id)
+			go kademlia.JoinAccepted(address[0], id)
 		} else {
 			fmt.Println("Something incorect with incoming message!")
 		}
