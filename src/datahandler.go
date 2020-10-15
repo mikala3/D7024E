@@ -44,11 +44,28 @@ func (kademlia *Kademlia) DataHandler() {
 			}
 			go kademlia.LookupContactAccepted(&contact, &contact2, contactlist)
 		} else if bytes.Contains(b, []byte("FindData<")) {
-			//var newdata []byte = b[9:]
-			//newstring := string(newdata)
+			contactarr := parseTwoContacts(b,9);
+			newstring := string(b)
+			fmt.Println(newstring)
+			split := strings.Split(newstring, ">")
+			if (kademlia.storage.Check(split[2])) {
+				data := kademlia.storage.Get(split[2])
+				kademlia.nt.SendFoundDataMessage(&contactarr[1],split[2],data)
+			} else {
+				contact := NewContact(NewKademliaID(split[2]),"localhost:0000")
+				newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
+				kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],split[2])
+			}
+		} else if bytes.Contains(b, []byte("FoundData<")) {
+			contactarr := parseTwoContacts(b,10);
+			newstring := string(b)
+			split := strings.Split(newstring, ">")
+			fmt.Println("Got data from: "+contactarr[1].String() + " Hash: "+split[2]+" Data: "+split[3]) 
 		} else if bytes.Contains(b, []byte("Data<")) {
-			//var newdata []byte = b[5:]
-			//newstring := string(newdata)
+			var newdata []byte = b[5:]
+			newstring := string(newdata)
+			split := strings.Split(newstring, ">")
+			kademlia.storage.Store(split[1],split[2])
 		} else if bytes.Contains(b, []byte("Join<")) {
 			var newdata []byte = b[5:]
 			newstring := string(newdata)

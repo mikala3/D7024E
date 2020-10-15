@@ -11,7 +11,7 @@ func TestPing(t *testing.T){
 	var port string = "8080"
 
 	sender := NewRandomKademliaID()
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Millisecond)
 	recivier := NewRandomKademliaID()
 	
 	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
@@ -39,7 +39,7 @@ func TestJoin(t *testing.T) {
 	var port string = "8080"
 
 	sender := NewRandomKademliaID()
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Millisecond)
 	recivier := NewRandomKademliaID()
 
 	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
@@ -75,9 +75,9 @@ func TestFind(t *testing.T) {
 	var port string = "8080"
 
 	sender := NewRandomKademliaID()
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Millisecond)
 	recivier := NewRandomKademliaID()
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Millisecond)
 	rtContactId := NewRandomKademliaID()
 
 	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
@@ -129,9 +129,9 @@ func TestFindAccepted(t *testing.T) {
 	var port string = "8080"
 
 	sender := NewRandomKademliaID()
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Millisecond)
 	recivier := NewRandomKademliaID()
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Millisecond)
 	rtContact := NewRandomKademliaID()
 
 	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
@@ -158,7 +158,122 @@ func TestFindAccepted(t *testing.T) {
 }
 
 func TestStoreObjects(t *testing.T) {
-	//TODO
+	var port string = "8080"
+
+	sender := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	recivier := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	hash := NewRandomKademliaID()
+
+	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
+	kc := make(chan []byte)
+	ex := make(chan []byte)
+	nt := NewNetwork(rt,kc,ex)
+	nt.testing = true;
+
+	ka := NewKademlia(nt)
+	ka.nt.rt.AddContact(NewContact(recivier, "localhost:8085"))
+
+	go ka.DataHandler()
+
+	ka.nt.kademliaChannel <- ([]byte("Data<contact("+recivier.String()+", localhost:8085)>"+hash.String()+">dettaardata"))
+
+	ka.nt.kademliaChannel <- ([]byte("FindData<contact("+sender.String()+", localhost:8080)>contact("+recivier.String()+", localhost:8085)>"+hash.String()))
+	msg := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg, ([]byte("FoundData<contact("+recivier.String()+", localhost:8085)>contact("+sender.String()+", localhost:8080)>"+hash.String()+">dettaardata")))) {
+		t.Errorf("Store test failed"+string(msg))
+	} else {
+		t.Logf("Success store test")
+	}
+}
+
+func TestStoreNotFound(t *testing.T) {
+	var port string = "8080"
+
+	sender := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	recivier := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	hash := NewRandomKademliaID()
+
+	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
+	kc := make(chan []byte)
+	ex := make(chan []byte)
+	nt := NewNetwork(rt,kc,ex)
+	nt.testing = true;
+
+	ka := NewKademlia(nt)
+	ka.nt.rt.AddContact(NewContact(recivier, "localhost:8085"))
+
+	go ka.DataHandler()
+
+	ka.nt.kademliaChannel <- ([]byte("FindData<contact("+sender.String()+", localhost:8080)>contact("+recivier.String()+", localhost:8085)>"+hash.String()))
+	msg := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg, ([]byte("FindData<contact("+recivier.String()+", localhost:8085)>contact("+recivier.String()+", localhost:8085)>"+hash.String())))) {
+		t.Errorf("Store not found test failed"+string(msg))
+	} else {
+		t.Logf("Success store not found test")
+	}
+}
+
+func TestFullStore(t *testing.T) {
+	var port string = "8080"
+
+	sender := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	recivier := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	rtContactId := NewRandomKademliaID()
+
+	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
+
+	kc := make(chan []byte)
+	ex := make(chan []byte)
+	nt := NewNetwork(rt,kc,ex)
+	nt.testing = true;
+
+	ka := NewKademlia(nt)
+
+	ka.nt.rt.AddContact(NewContact(recivier, "localhost:8085"))
+
+	go ka.DataHandler()
+
+	go ka.Store(rtContactId.String(), ([]byte("supersecret")))
+
+	msg := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg, ([]byte("Find<contact("+rtContactId.String()+", localhost:0000)>contact("+sender.String()+", localhost:8080)")))) {
+		t.Errorf("FullStore test failed: msg "+string(msg))
+	}
+	//Write to internal channel, findaccepted with contact searched
+	//Check kbucket after
+
+	//Send find accept with contact searched for in bucket (sent from recivier)
+	ka.nt.kademliaChannel <- ([]byte("FindAccepted<contact("+rtContactId.String()+", localhost:0000)>contact("+recivier.String()+", localhost:8085)>contact("+rtContactId.String()+", localhost:8090)"))
+	msg2 := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg2, ([]byte("Find<contact("+rtContactId.String()+", localhost:0000)>contact("+sender.String()+", localhost:8080)")))) {
+		t.Errorf("FullStore test failed: msg2 "+string(msg2))
+	}
+	ka.nt.kademliaChannel <- ([]byte("FindAccepted<contact("+rtContactId.String()+", localhost:0000)>contact("+rtContactId.String()+", localhost:8090)>contact("+recivier.String()+", localhost:8085)"))
+	for {
+		if (ka.firstrun == true) {break}
+	}
+	contactsInRt := ka.nt.rt.FindClosestContacts(rtContactId,10)
+	if (!contactsInRt[0].ID.Equals(rtContactId)) {
+		t.Errorf("FullStore test failed: rt "+string(contactsInRt[0].String()))
+	} else {
+		t.Logf("Success FullStore test")
+	}
+
+	msg3 := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg3, ([]byte("Data<contact("+sender.String()+", localhost:8080)>"+rtContactId.String()+">supersecret")))) {
+		t.Errorf("FullStore test failed: msg3 "+string(msg3))
+	}
+
+	msg4 := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg4, ([]byte("Data<contact("+sender.String()+", localhost:8080)>"+rtContactId.String()+">supersecret")))) {
+		t.Errorf("FullStore test failed: msg4 "+string(msg4))
+	}
 }
 
 func TestPut(t *testing.T) {

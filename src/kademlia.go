@@ -16,6 +16,7 @@ type Kademlia struct {
 	index int
 	kaalpha int
 	firstrun bool
+	storage *Storage
 }
 
 // NewNetwork returns a new instance of a RNetwork
@@ -25,6 +26,8 @@ func NewKademlia(nt *Network) *Kademlia {
 	kademlia.firstrun = true;
 	kademlia.index = 0;
 	kademlia.kaalpha = 0;
+	m := make(map[string][]byte)
+	kademlia.storage = NewStorage(m)
 	return kademlia
 }
 
@@ -100,11 +103,23 @@ func (kademlia *Kademlia) LookupContactAccepted(target *Contact, sender *Contact
 }
 
 func (kademlia *Kademlia) LookupData(hash string) {
-	// TODO
+	if (kademlia.storage.Check(hash)) {
+		fmt.Println(kademlia.storage.Get(hash))
+	} else {
+		contact := NewContact(NewKademliaID(hash),"localhost:0000")
+		newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
+		kademlia.nt.SendLookupDataMessage(&newclosest[0],&kademlia.nt.rt.me,hash)
+	}
 }
 
-func (kademlia *Kademlia) Store(data []byte) {
-	// TODO
+func (kademlia *Kademlia) Store(hash string, data []byte) {
+	contact := NewContact(NewKademliaID(hash),"localhost:0000")
+	kademlia.LookupContact(&contact,&kademlia.nt.rt.me)
+	for {if (kademlia.firstrun == true) {break}}
+	newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,k)
+	for co := 0; co < len(newclosest); co++ {
+		kademlia.nt.SendStoreDataMessage(&newclosest[co],hash,data)
+	}
 }
 
 func (kademlia *Kademlia) Ping(target *Contact, sender *Contact) {

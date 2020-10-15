@@ -219,56 +219,63 @@ func (network *Network) SendFindContactMessage(contact *Contact, recivier *Conta
 	}
 }
 
-func (network *Network) SendFindDataMessage(hash string) {
-	// TODO
+func (network *Network) SendLookupDataMessage(contact *Contact, sender *Contact, hash string) {
+	if (network.testing) {
+		network.externalChannel <- ([]byte("FindData<"+contact.String()+">"+sender.String()+">"+hash))
+	} else {
+		conn, err := net.Dial("tcp", contact.Address)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer conn.Close()
+
+		if _, err := conn.Write([]byte("FindData<"+contact.String()+">"+sender.String()+">"+hash)); err != nil {
+			log.Fatal(err)
+		}
+		// network.externalChannel <- ([]byte("Store<"+contact.String()+dataString))
+		// conn.Close()
+	} 
+}
+
+func (network *Network) SendFoundDataMessage(contact *Contact, hash string, data []byte) {
+	if (network.testing) {
+		dataString := string(data)
+		network.externalChannel <- ([]byte("FoundData<"+contact.String()+">"+network.rt.me.String()+">"+hash+">"+dataString))
+	} else {
+		conn, err := net.Dial("tcp", contact.Address)
+		dataString := string(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer conn.Close()
+
+		if _, err := conn.Write([]byte("FoundData<"+contact.String()+">"+network.rt.me.String()+">"+hash+">"+dataString)); err != nil {
+			log.Fatal(err)
+		}
+		// network.externalChannel <- ([]byte("Store<"+contact.String()+dataString))
+		// conn.Close()
+	} 
 }
 
 //Needs more work later, need to match with data to find if we are close enough with hash
-func (network *Network) SendStoreMessage(data []byte, contact *Contact) {
+func (network *Network) SendStoreDataMessage(contact *Contact, hash string, data []byte) {
 	if (network.testing) {
-		if network.rt.me.ID.Equals(contact.ID) {
-			dataString := string(data)
-			network.externalChannel <- ([]byte("Store<"+contact.String()+dataString))
-		} else {
-			network.externalChannel <- ([]byte("Find<"+contact.String()))
-		}
+		dataString := string(data)
+		network.externalChannel <- ([]byte("Data<"+network.rt.me.String()+">"+hash+">"+dataString))
 	} else {
-		// TODO
-		if network.rt.me.ID.Equals(contact.ID) {
-			//We are the node that is trying to be found
-			/* k closest nodes to the target node */
-			k_closest_nodes := network.rt.FindClosestContacts(contact.ID, 20)
-			for co := 0; co < len(k_closest_nodes); co++ {
-				conn, err := net.Dial("tcp", k_closest_nodes[co].Address)
-				dataString := string(data)
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer conn.Close()
-		
-				if _, err := conn.Write([]byte("Store<"+contact.String()+dataString)); err != nil {
-					log.Fatal(err)
-				}
-				// network.externalChannel <- ([]byte("Store<"+contact.String()+dataString))
-				// conn.Close()
-			} 
-		} else {
-			coid := network.rt.FindClosestContacts(contact.ID, 20)
-			for co := 0; co < len(coid); co++ {
-				conn, err := net.Dial("tcp", coid[co].Address)
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer conn.Close()
-		
-				if _, err := conn.Write([]byte("Find<"+contact.String())); err != nil {
-					log.Fatal(err)
-				}
-				// network.externalChannel <- ([]byte("Find<"+contact.String()))
-				// conn.Close()
-			} 
+		conn, err := net.Dial("tcp", contact.Address)
+		dataString := string(data)
+		if err != nil {
+			log.Fatal(err)
 		}
-	}
+		defer conn.Close()
+
+		if _, err := conn.Write([]byte("Data<"+network.rt.me.String()+">"+hash+">"+dataString)); err != nil {
+			log.Fatal(err)
+		}
+		// network.externalChannel <- ([]byte("Store<"+contact.String()+dataString))
+		// conn.Close()
+	} 
 
 }
 
