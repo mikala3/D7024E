@@ -13,11 +13,11 @@ func (kademlia *Kademlia) DataHandler() {
 		b := <- kademlia.nt.kademliaChannel
 		if bytes.Contains(b, []byte("Ping<")) {
 			contactarr := parseTwoContacts(b,5);
-			go kademlia.Ping(&contactarr[0], &contactarr[1])
+			go kademlia.nt.SendPingAccepted(&contactarr[1], &contactarr[0])
 			//newstring = contact(id, address)
 		} else if bytes.Contains(b, []byte("PingAccepted<")) {
 			contactarr := parseTwoContacts(b,13);
-			go kademlia.nt.SendPingAccepted(&contactarr[0], &contactarr[1])
+			fmt.Println("Ping bounced back from: "+contactarr[1].ID.String())
 			//newstring = contact(id, address)
 		} else if bytes.Contains(b, []byte("Find<")) {
 			contactarr := parseTwoContacts(b,5);
@@ -82,6 +82,8 @@ func (kademlia *Kademlia) DataHandler() {
 			id := stringarr[0]
 			address := strings.Split(stringarr[1][1:], ")")
 			go kademlia.JoinAccepted(address[0], id)
+		} else if bytes.Contains(b, []byte("+TERMINATE+")) {
+			break
 		} else {
 			fmt.Println("Something incorect with incoming message!")
 		}

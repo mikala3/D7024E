@@ -34,11 +34,20 @@ func command(k *Kademlia) {
 			var contact = NewContact(NewKademliaID(id),ip)
 			k.LookupContact(&contact, &k.nt.rt.me)
 		} else if (cmd == "-put") {
-			fmt.Println("Not implemented ") 
+			fmt.Println("Enter content to store: ") 
+			var data string 
+			fmt.Scanln(&data) 
+			hash := NewRandomKademliaID()
+			k.Store(hash.String(),([]byte(data)))
 		} else if (cmd == "-get") {
-			fmt.Println("Not implemented ") 
+			fmt.Println("Enter the hash: ") 
+			var hash string 
+			fmt.Scanln(&hash)
+			k.LookupData(hash) 
 		} else if (cmd == "-exit") {
-			fmt.Println("Not implemented ") 
+			k.nt.terminate = true //Stop listen loop
+			k.nt.kademliaChannel <- ([]byte("+TERMINATE+")) //Stop datahandler
+			break
 		}
 	}
 } 

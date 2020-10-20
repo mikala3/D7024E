@@ -276,30 +276,165 @@ func TestFullStore(t *testing.T) {
 	}
 }
 
-func TestPut(t *testing.T) {
-	//TODO
+
+/*func TestExit(t *testing.T) {
+	var port string = "8080"
+
+	sender := NewRandomKademliaID()
+	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
+	time.Sleep(2 * time.Millisecond)
+	recivier := NewRandomKademliaID()
+	
+	kc := make(chan []byte)
+	ex := make(chan []byte)
+	nt := NewNetwork(rt,kc,ex)
+	nt.testing = true;
+
+	ka := NewKademlia(nt)
+
+	go ka.DataHandler()
+	ka.nt.terminate = true
+	ka.nt.kademliaChannel <- ([]byte("+TERMINATE+"))
+
+	ka.nt.kademliaChannel <- ([]byte("Ping<contact("+sender.String()+", localhost:8080)>contact("+recivier.String()+", localhost:8085)"))
+	msg := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg, ([]byte("PingAccepted<contact("+recivier.String()+", localhost:8085)>contact("+sender.String()+", localhost:8080)")))) {		
+		t.Errorf("Ping test failed"+string(msg))
+	} else {
+		t.Logf("success ping test")
+	}
+} */
+
+func TestStoreModule(t *testing.T) {
+	var port string = "8080"
+
+	sender := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	hash := NewRandomKademliaID()
+
+	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
+
+	kc := make(chan []byte)
+	ex := make(chan []byte)
+	nt := NewNetwork(rt,kc,ex)
+	nt.testing = true;
+
+	ka := NewKademlia(nt)
+	ka.storage.Store(hash.String(),"TestStore")
+	data := ka.storage.Get(hash.String())
+	if (string(data) != "TestStore") {
+		t.Errorf("TestStoreModule test failed: data "+string(data))
+	} else {
+		t.Logf("Success store module test")
+	}
 }
 
-func TestGet(t *testing.T) {
-	//TODO
+func TestCheckModule(t *testing.T) {
+	var port string = "8080"
+
+	sender := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	hash := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	rand := NewRandomKademliaID()
+
+	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
+
+	kc := make(chan []byte)
+	ex := make(chan []byte)
+	nt := NewNetwork(rt,kc,ex)
+	nt.testing = true;
+
+	ka := NewKademlia(nt)
+	ka.storage.Store(hash.String(),"TestStore")
+	if (!ka.storage.Check(hash.String())) {
+		t.Errorf("TestCheckModule test failed: hash "+hash.String())
+	}
+	if (ka.storage.Check(rand.String())) {
+		t.Errorf("TestCheckModule test failed: rand "+rand.String())
+	} else {
+		t.Logf("Success check module test")
+	}
 }
 
-func TestExit(t *testing.T) {
-	//TODO
+func TestParseTwoContacts(t *testing.T) {
+	sender := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	recivier := NewRandomKademliaID()
+	data := ([]byte("FindData<contact("+sender.String()+", localhost:8080)>contact("+recivier.String()+", localhost:8085)>"))
+	contactarr := parseTwoContacts(data,9)
+	if (!contactarr[0].ID.Equals(sender)) {
+		t.Errorf("TestParseTwoContacts test failed: contactarr[0].ID "+contactarr[0].ID.String())
+	}
+	if (contactarr[0].Address != "localhost:8080") {
+		t.Errorf("TestParseTwoContacts test failed: contactarr[0].Address "+contactarr[1].Address)
+	}
+	if (!contactarr[1].ID.Equals(recivier)) {
+		t.Errorf("TestParseTwoContacts test failed: contactarr[1].ID "+contactarr[1].ID.String())
+	}
+	if (contactarr[1].Address != "localhost:8085") {
+		t.Errorf("TestParseTwoContacts test failed: contactarr[1].Address "+contactarr[1].Address)
+	} else {
+		t.Logf("Success parse two test")
+	}
 }
 
-func TestContact(t *testing.T) {
-	//TODO
+func TestContains(t *testing.T) {
+	senderId := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	recivierId := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	rtContactId := NewRandomKademliaID()
+
+	sender := NewContact(senderId, "localhost:8080")
+	recivier := NewContact(recivierId, "localhost:8085")
+	rtContact := NewContact(rtContactId, "localhost:8090")
+
+	var List1 []Contact
+	var List2 []Contact
+
+	List1 = []Contact{sender,recivier,rtContact}
+	List2 = []Contact{sender,recivier}
+	
+	if (!Contains(List1,rtContact)) {
+		fmt.Println(List1)
+		t.Errorf("TestContains test failed "+rtContact.String())
+	}
+	if (Contains(List2,rtContact)) {
+		t.Errorf("TestContains test failed "+rtContact.String())
+	} else {
+		t.Logf("Success contains test")
+	}
 }
 
-func TestBucket(t *testing.T) {
-	//TODO
+func TestContainsSame(t *testing.T) {
+	senderId := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	recivierId := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	rtContactId := NewRandomKademliaID()
+
+	sender := NewContact(senderId, "localhost:8080")
+	recivier := NewContact(recivierId, "localhost:8085")
+	rtContact := NewContact(rtContactId, "localhost:8090")
+
+	List1 := []Contact{sender,recivier,rtContact}
+	List2 := []Contact{sender,recivier,rtContact}
+
+	List3 := []Contact{sender,rtContact,recivier}
+
+	List4 := []Contact{sender,rtContact}
+
+	if (!ContainsSame(List1,List2)) {
+		t.Errorf("TestContainsSame test failed")
+	}
+	if (!ContainsSame(List2,List3)) {
+		t.Errorf("TestContainsSame test failed")
+	}
+	if (ContainsSame(List2,List4)) {
+		t.Errorf("TestContainsSame test failed")
+	} else {
+		t.Logf("Success contains same test")
+	}
 }
 
-func TestSwitch(t *testing.T) {
-	//TODO
-}
-
-func TestDistance(t *testing.T) {
-	//TODO
-}

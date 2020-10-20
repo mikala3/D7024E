@@ -16,6 +16,8 @@ type Kademlia struct {
 	index int
 	kaalpha int
 	firstrun bool
+	//ping bool
+	//pingContact *Contact
 	storage *Storage
 }
 
@@ -24,6 +26,7 @@ func NewKademlia(nt *Network) *Kademlia {
 	kademlia := &Kademlia{}
 	kademlia.nt = nt
 	kademlia.firstrun = true;
+	//kademlia.ping = false;
 	kademlia.index = 0;
 	kademlia.kaalpha = 0;
 	m := make(map[string][]byte)
@@ -71,6 +74,8 @@ func (kademlia *Kademlia) LookupContactAccepted(target *Contact, sender *Contact
 				kademlia.closestContact = &contact
 			}
 			if (!contact.ID.Equals(kademlia.nt.rt.me.ID)){ //Needs to be changed so that it pings contacts in bucket and updates accordingly
+				// kademlia.ping = true;
+				// kademlia.Ping(&contact,&kademlia.nt.rt.me)
 				kademlia.nt.rt.AddContact(contact)
 			}
 		}
@@ -135,19 +140,35 @@ func (kademlia *Kademlia) JoinAccepted(ip string, id string) {
 	kademlia.nt.rt.AddContact(NewContact(NewKademliaID(id), ip))
 }
 
+// func (kademlia *Kademlia) AddContact(contact *Contact) {
+// 	bucketIndex := kademlia.nt.rt.getBucketIndex(contact.ID)
+// 	bucket := kademlia.nt.rt.buckets[bucketIndex]
+// 	if (bucket.Len()<bucketSize) {
+// 		kademlia.ping = true
+// 		kademlia.pingContact = contact
+// 		kademlia.Ping(bucket.GetFirst(),&kademlia.nt.rt.me)
+// 	} else {
+// 		kademlia.nt.rt.AddContact(*contact)
+// 	}
+// }
+
 func ContainsSame(a []Contact, x []Contact) bool {
-    for _, n := range x {
-        if Contains(a,n) {
-            return true
-        }
-    }
-    return false
+    for _, n := range a {
+        if Contains(x,n) {
+			if (n.String() == a[len(a)-1].String()) {
+				return true
+			}
+        } else {
+			return false
+		}
+	}
+	return false
 }
 
 func Contains(a []Contact, x Contact) bool {
     for _, n := range a {
-        if x == n {
-            return true
+		if x.String() == n.String() {
+			return true
         }
     }
     return false

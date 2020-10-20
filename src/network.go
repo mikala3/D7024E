@@ -13,6 +13,7 @@ type Network struct {
 	kademliaChannel chan []byte
 	externalChannel chan []byte
 	testing bool
+	terminate bool
 }
 
 // NewNetwork returns a new instance of a RNetwork
@@ -22,6 +23,7 @@ func NewNetwork(rt *RoutingTable, kc chan []byte, ex chan []byte) *Network {
 	network.kademliaChannel = kc
 	network.externalChannel = ex
 	network.testing = false
+	network.terminate = false
 	return network
 }
 
@@ -80,63 +82,37 @@ func (network *Network) Listen(port int) {
 //fmt.Println(strings.TrimSuffix("localhost:8080)", ")"))
 func (network *Network) SendPingAccepted(contact *Contact, sender *Contact) {
 	if (network.testing) {
-		if network.rt.me.ID.Equals(contact.ID) {
-			//Ping accepted recivied, ping bounced back.
-			fmt.Println("Ping bounced back from "+sender.String())
-		} else {
-			network.externalChannel <- ([]byte("PingAccepted<"+contact.String()+">"+sender.String()))
-		}
+		network.externalChannel <- ([]byte("PingAccepted<"+contact.String()+">"+network.rt.me.String()))
 	} else {
-		if network.rt.me.ID.Equals(contact.ID) {
-			//Ping accepted recivied, ping bounced back.
-			fmt.Println("Ping bounced back from "+sender.String())
-		} else {
-			coid := network.rt.FindClosestContacts(contact.ID, 1)
-			for co := 0; co < len(coid); co++ {
-				conn, err := net.Dial("tcp", coid[co].Address)
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer conn.Close()
-	
-				if _, err := conn.Write([]byte("PingAccepted<"+contact.String()+">"+sender.String())); err != nil {
-					log.Fatal(err)
-				}
-				// network.externalChannel <- ([]byte("PingAccepted<"+contact.String()+">"+sender.String()))
-				// conn.Close()
-			}
+		conn, err := net.Dial("tcp", contact.Address)
+		if err != nil {
+			log.Fatal(err)
 		}
+		defer conn.Close()
+
+		if _, err := conn.Write([]byte("PingAccepted<"+contact.String()+">"+network.rt.me.String())); err != nil {
+			log.Fatal(err)
+		}
+		// network.externalChannel <- ([]byte("PingAccepted<"+contact.String()+">"+sender.String()))
+		// conn.Close()
 	}
 }
 
 func (network *Network) SendPingMessage(contact *Contact, sender *Contact) {
 	if (network.testing) {
-		if network.rt.me.ID.Equals(contact.ID) {
-			fmt.Println("Ping recivied from "+sender.String())
-			network.SendPingAccepted(sender, &network.rt.me)
-		} else {
-			network.externalChannel <- ([]byte("Ping<"+contact.String()+">"+sender.String()))
-		}
+		network.externalChannel <- ([]byte("Ping<"+contact.String()+">"+network.rt.me.String()))
 	} else {
-		if network.rt.me.ID.Equals(contact.ID) {
-			fmt.Println("Ping recivied from "+sender.String())
-			network.SendPingAccepted(sender, &network.rt.me)
-		} else {
-			coid := network.rt.FindClosestContacts(contact.ID, 1)
-			for co := 0; co < len(coid); co++ {
-				conn, err := net.Dial("tcp", coid[co].Address)
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer conn.Close()
-
-				if _, err := conn.Write([]byte("Ping<"+contact.String()+">"+sender.String())); err != nil {
-					log.Fatal(err)
-				}
-				// network.externalChannel <- ([]byte("Ping<"+contact.String()+">"+sender.String()))
-				// conn.Close()
-			}
+		conn, err := net.Dial("tcp", contact.Address)
+		if err != nil {
+			log.Fatal(err)
 		}
+		defer conn.Close()
+
+		if _, err := conn.Write([]byte("Ping<"+contact.String()+">"+network.rt.me.String())); err != nil {
+			log.Fatal(err)
+		}
+		// network.externalChannel <- ([]byte("Ping<"+contact.String()+">"+sender.String()))
+		// conn.Close()
 	}
 }
 

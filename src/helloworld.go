@@ -1,8 +1,8 @@
 package main
 
-import "fmt"
+/*import "fmt"
 
 func test() {
 	fmt.Println("Hello World")
 
-}
+} */
