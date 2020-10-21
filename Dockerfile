@@ -18,4 +18,4 @@ RUN mkdir /app
 ADD . /app/
 WORKDIR /app
 RUN go build -o main ./src/.
-CMD ["app/src/main"]
+CMD ["/app/src/main"]
