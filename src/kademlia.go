@@ -138,6 +138,7 @@ func (kademlia *Kademlia) Join(ip string, id string) {
 
 func (kademlia *Kademlia) JoinAccepted(ip string, id string) {
 	kademlia.nt.rt.AddContact(NewContact(NewKademliaID(id), ip))
+	kademlia.LookupContact(&kademlia.nt.rt.me,&kademlia.nt.rt.me)
 }
 
 // func (kademlia *Kademlia) AddContact(contact *Contact) {

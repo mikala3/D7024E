@@ -1,10 +1,10 @@
 package main
 
 // import "net"
-import "log"
+// import "log"
 // import "io"
 import "fmt"
-import "strconv"
+// import "strconv"
 
 // main function 
 func command(k *Kademlia) { 
@@ -69,13 +69,13 @@ func main() {
 	// 		c.Close()
 	// 	}(conn)
 	// }
-	fmt.Println("Enter port: ") 
+	// fmt.Println("Enter port: ") 
   
-	var port string 
+	// var port string 
 	
-	fmt.Scanln(&port) 
-	fmt.Println("jada")
-	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), "localhost:"+port))
+	// fmt.Scanln(&port) 
+	// fmt.Println("jada")
+	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), "localhost:"+"8000"))
 
 	kc := make(chan []byte)
 	ex := make(chan []byte)
@@ -83,12 +83,13 @@ func main() {
 
 	ka := NewKademlia(nt)
 
-	iport, err := strconv.Atoi(port)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// iport, err := strconv.Atoi(port)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	go nt.Listen(iport)
+	go nt.Listen(8000)
 	go ka.DataHandler()
+	go ka.nt.SendJoinMessage("localhost:5001")
 	command(ka)
 }
