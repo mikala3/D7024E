@@ -90,6 +90,6 @@ func main() {
 
 	go nt.Listen(8000)
 	go ka.DataHandler()
-	go ka.nt.SendJoinMessage("localhost:5001")
+	//go ka.nt.SendJoinMessage("localhost:5001")
 	command(ka)
 }
