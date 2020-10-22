@@ -7,8 +7,11 @@ import "fmt"
 // import "strconv"
 
 // main function 
-func command(k *Kademlia) { 
+func command(k *Kademlia, testing bool) { 
 	fmt.Println("cmd")
+	if (testing) {
+		for {}
+	}
 	for {
 		fmt.Println("Enter command (-h for help): ") 
   
@@ -94,5 +97,5 @@ func main() {
 	if (addressToJoin != "") {
 		go ka.nt.SendJoinMessage(addressToJoin+":8000")
 	}
-	command(ka)
+	command(ka,true)
 }
