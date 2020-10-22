@@ -28,15 +28,34 @@ func NewNetwork(rt *RoutingTable, kc chan []byte, ex chan []byte) *Network {
 	return network
 }
 
-func GetIpAddress() string {
-	//awk 'END{print $1}' /etc/hosts
-	//, "|", "gawk", "'{print $1}'"
-	command, err := exec.Command("hostname", "-I").Output()
-	if (err != nil) {
-		fmt.Println(err)
+// func GetIpAddress() string {
+// 	//awk 'END{print $1}' /etc/hosts
+// 	//, "|", "gawk", "'{print $1}'"
+// 	command, err := exec.Command("hostname", "-I").Output()
+// 	if (err != nil) {
+// 		fmt.Println(err)
+// 		return ""
+// 	}
+// 	return string(command)
+// }
+
+func (network *Network) GetIpAddress() string {
+	add, err := net.InterfaceAddrs()
+
+	if err != nil {
+		fmt.Println("Failed to get own IP")
 		return ""
 	}
-	return string(command)
+
+	for _, address := range add {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }
 
 func (network *Network) GetIpToJoin() string {

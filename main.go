@@ -78,16 +78,18 @@ func main() {
 	
 	// fmt.Scanln(&port) 
 	// fmt.Println("jada")
-	ownip := GetIpAddress()
-	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), ownip+"8000"))
-
-	fmt.Println("Own ip: "+ownip)
+	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), ""))
 
 	kc := make(chan []byte)
 	ex := make(chan []byte)
 	nt := NewNetwork(rt,kc,ex)
 
+	ownip := nt.GetIpAddress()
+	fmt.Println("Own ip: "+ownip)
+
 	ka := NewKademlia(nt)
+
+	ka.nt.rt.me.Address = ownip
 
 	// iport, err := strconv.Atoi(port)
 	// if err != nil {
