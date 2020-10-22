@@ -54,7 +54,7 @@ func (kademlia *Kademlia) DataHandler() {
 			} else {
 				contact := NewContact(NewKademliaID(split[2]),"localhost:0000")
 				newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
-				if (!contact.ID.Equals(kademlia.nt.rt.me.ID)) {
+				if (!newclosest[0].ID.Equals(kademlia.nt.rt.me.ID)) {
 					kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],split[2])
 				}
 			}

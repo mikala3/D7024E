@@ -52,6 +52,7 @@ func command(k *Kademlia, testing bool) {
 			fmt.Println("Enter the hash: ") 
 			var hash string 
 			fmt.Scanln(&hash)
+			fmt.Println(hash)
 			go k.LookupData(hash) 
 		} else if (cmd == "-exit") {
 			k.nt.terminate = true //Stop listen loop
