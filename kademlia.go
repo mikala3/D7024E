@@ -112,8 +112,11 @@ func (kademlia *Kademlia) LookupData(hash string) {
 		fmt.Println(kademlia.storage.Get(hash))
 	} else {
 		contact := NewContact(NewKademliaID(hash),"localhost:0000")
-		newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
-		kademlia.nt.SendLookupDataMessage(&newclosest[0],&kademlia.nt.rt.me,hash)
+		newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,k)
+		for co := 0; co < len(newclosest); co++ {
+			kademlia.nt.SendLookupDataMessage(&newclosest[co],&kademlia.nt.rt.me,hash)
+		}
+		
 	}
 }
 
