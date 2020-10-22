@@ -1,10 +1,13 @@
 package main
 
-// import "net"
-// import "log"
-// import "io"
-import "fmt"
-// import "strconv"
+import (
+	//"net"
+	//"log"
+	//"io"
+	"fmt"
+	"time"
+	//"strconv"
+)
 
 // main function 
 func command(k *Kademlia, testing bool) { 
@@ -105,6 +108,7 @@ func main() {
 	go ka.DataHandler()
 	addressToJoin := "10.0.1.5:8000"
 	//fmt.Println("Address to join: "+addressToJoin)
+	time.Sleep(2 * time.Second)
 	if (addressToJoin != "") {
 		//fmt.Println("Attemting to join "+addressToJoin)
 		go ka.nt.SendJoinMessage(addressToJoin)
