@@ -166,12 +166,12 @@ func (network *Network) SendPingAll() {
 	// 	log.Fatal("Destination Host Unreachable")
 	// }
 	if (network.testing) {
-		coid := network.rt.FindClosestContacts(network.rt.me.ID, 3)
+		coid := network.rt.FindClosestContacts(network.rt.me.ID, alpha*10)
 		for co := 0; co < len(coid); co++ {
 			network.externalChannel <- ([]byte("Ping<"+coid[co].String()+">"+network.rt.me.String()))
 		}
 	} else {
-		coid := network.rt.FindClosestContacts(network.rt.me.ID, 3)
+		coid := network.rt.FindClosestContacts(network.rt.me.ID, alpha*10)
 		for co := 0; co < len(coid); co++ {
 			conn, err := net.Dial("tcp", coid[co].Address)
 			if err != nil {
