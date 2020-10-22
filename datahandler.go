@@ -48,6 +48,7 @@ func (kademlia *Kademlia) DataHandler() {
 			newstring := string(b)
 			fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
+			fmt.Println(split[2])
 			if (kademlia.storage.Check(split[2])) {
 				data := kademlia.storage.Get(split[2])
 				kademlia.nt.SendFoundDataMessage(&contactarr[1],split[2],data)
@@ -66,6 +67,7 @@ func (kademlia *Kademlia) DataHandler() {
 		} else if bytes.Contains(b, []byte("Data<")) {
 			var newdata []byte = b[5:]
 			newstring := string(newdata)
+			fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
 			kademlia.storage.Store(split[1],split[2])
 		} else if bytes.Contains(b, []byte("Join<")) {
