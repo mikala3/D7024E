@@ -104,9 +104,9 @@ func main() {
 	go nt.Listen(8000)
 	go ka.DataHandler()
 	addressToJoin := "10.0.1.5:8000"
-	fmt.Println("Address to join: "+addressToJoin)
+	//fmt.Println("Address to join: "+addressToJoin)
 	if (addressToJoin != "") {
-		fmt.Println("Attemting to join "+addressToJoin)
+		//fmt.Println("Attemting to join "+addressToJoin)
 		go ka.nt.SendJoinMessage(addressToJoin)
 	}
 	command(ka,true)
