@@ -452,3 +452,23 @@ func TestContainsSame(t *testing.T) {
 	}
 }
 
+func TestKademliaEqual(t *testing.T) {
+	Id1 := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	Id2 := NewRandomKademliaID()
+
+	if (Id1.Equals(Id2)) {
+		t.Errorf("TestKademliaEqual test failed")
+	}
+	if (Id2.Equals(Id1)) {
+		t.Errorf("TestKademliaEqual test failed")
+	}
+	if (!Id1.Equals(Id1)) {
+		t.Errorf("TestKademliaEqual test failed")
+	}
+	if (!Id2.Equals(Id2)) {
+		t.Errorf("TestKademliaEqual test failed")
+	} else {
+		t.Logf("Success kademlia same test")
+	}
+}
