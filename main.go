@@ -8,7 +8,7 @@ import "fmt"
 
 // main function 
 func command(k *Kademlia, testing bool) { 
-	fmt.Println("cmd")
+	//fmt.Println("cmd")
 	if (testing) {
 		for {}
 	}
@@ -78,7 +78,10 @@ func main() {
 	
 	// fmt.Scanln(&port) 
 	// fmt.Println("jada")
-	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), GetIpAddress()+"8000"))
+	ownip := GetIpAddress()
+	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), ownip+"8000"))
+
+	fmt.Println("Own ip: "+ownip)
 
 	kc := make(chan []byte)
 	ex := make(chan []byte)
@@ -94,8 +97,9 @@ func main() {
 	go nt.Listen(8000)
 	go ka.DataHandler()
 	addressToJoin := ka.nt.GetIpToJoin()
+	fmt.Println("Address to join: "+addressToJoin)
 	if (addressToJoin != "") {
-		fmt.Println("Attemting to join"+addressToJoin)
+		fmt.Println("Attemting to join "+addressToJoin)
 		go ka.nt.SendJoinMessage(addressToJoin+":8000")
 	}
 	command(ka,true)
