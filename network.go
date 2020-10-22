@@ -29,7 +29,8 @@ func NewNetwork(rt *RoutingTable, kc chan []byte, ex chan []byte) *Network {
 }
 
 func GetIpAddress() string {
-	command, err := exec.Command("awk 'END{print $1}' /etc/hosts").Output()
+	//awk 'END{print $1}' /etc/hosts
+	command, err := exec.Command("hostname -i | awk '{print $1}").Output()
 	if (err != nil) {
 		fmt.Println(err)
 		return ""
