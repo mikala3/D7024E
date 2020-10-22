@@ -16,7 +16,7 @@ func command(k *Kademlia, testing bool) {
 		for {}
 	}
 	for {
-		fmt.Println("Enter command (-h for help): ") 
+		//fmt.Println("Enter command (-h for help): ") 
   
 		var cmd string 
 	
