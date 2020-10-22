@@ -5,7 +5,7 @@ import (
 	"net"
 	"log"
 	"strconv"
-	//"fmt"
+	"fmt"
 	"os/exec"
 )
 
@@ -31,6 +31,7 @@ func NewNetwork(rt *RoutingTable, kc chan []byte, ex chan []byte) *Network {
 func GetIpAddress() string {
 	command, err := exec.Command("awk 'END{print $1}' /etc/hosts").Output()
 	if (err != nil) {
+		fmt.Println(err)
 		return ""
 	}
 	return string(command)
@@ -39,6 +40,7 @@ func GetIpAddress() string {
 func (network *Network) GetIpToJoin() string {
 	command, err := exec.Command("ping swarm_kademliaNodes.1 | jq '.ip'").Output()
 	if (err != nil) {
+		fmt.Println(err)
 		return ""
 	}
 	if (string(command) == network.rt.me.Address) {
