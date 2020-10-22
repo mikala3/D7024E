@@ -113,5 +113,5 @@ func main() {
 		//fmt.Println("Attemting to join "+addressToJoin)
 		go ka.nt.SendJoinMessage(addressToJoin)
 	}
-	command(ka,true)
+	command(ka,false)
 }
