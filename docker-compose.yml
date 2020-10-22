@@ -27,8 +27,7 @@ services:
       - "8000-8080:8000"
     networks:
       kademlia_network:
-        app_net:
-          ipv4_address: 10.0.1.0    
+        ipv4_address: 10.0.1.0    
 networks:
   kademlia_network:
     ipam:
