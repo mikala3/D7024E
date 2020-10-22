@@ -458,6 +458,8 @@ func TestKademliaEqual(t *testing.T) {
 	Id2 := NewRandomKademliaID()
 	Id3 := NewKademliaID(Id2.String())
 
+	Id1Contact := NewContact(Id1, "localhost:8080")
+	Id1Contact2 := NewContact(Id1, "localhost:8080")
 
 	if (Id1.Equals(Id2)) {
 		t.Errorf("TestKademliaEqual test failed")
@@ -466,6 +468,12 @@ func TestKademliaEqual(t *testing.T) {
 		t.Errorf("TestKademliaEqual test failed")
 	}
 	if (!Id1.Equals(Id1)) {
+		t.Errorf("TestKademliaEqual test failed")
+	}
+	if (!Id1.Equals(Id1Contact.ID)) {
+		t.Errorf("TestKademliaEqual test failed")
+	}
+	if (!Id1Contact.ID.Equals(Id1Contact2.ID)) {
 		t.Errorf("TestKademliaEqual test failed")
 	}
 	if (!Id2.Equals(Id2)) {

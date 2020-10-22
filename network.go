@@ -299,6 +299,27 @@ func (network *Network) SendStoreDataMessage(contact *Contact, hash string, data
 
 }
 
+func (network *Network) SendStoreDataAcceptedMessage(contact *Contact, hash string, data []byte) {
+	if (network.testing) {
+		dataString := string(data)
+		network.externalChannel <- ([]byte("DataAccepted<"+network.rt.me.String()+">"+hash+">"+dataString))
+	} else {
+		conn, err := net.Dial("tcp", contact.Address)
+		dataString := string(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer conn.Close()
+
+		if _, err := conn.Write([]byte("DataAccepted<"+network.rt.me.String()+">"+hash+">"+dataString)); err != nil {
+			log.Fatal(err)
+		}
+		// network.externalChannel <- ([]byte("Store<"+contact.String()+dataString))
+		// conn.Close()
+	} 
+
+}
+
 func (network *Network) SendJoinMessage(ip string) {
 	if (network.testing) {
 		network.externalChannel <- ([]byte("Join<"+network.rt.me.String()))

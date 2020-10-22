@@ -73,9 +73,24 @@ func (kademlia *Kademlia) DataHandler() {
 			newstring := string(newdata)
 			fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
+			stringarr := strings.Split(split[0][8:(len(split[0])-1)], ",")
+			id := stringarr[0]
+			address := strings.Split(stringarr[1][1:], ")")
+			contact := NewContact(NewKademliaID(id),address[0])
 			kademlia.storage.Store(split[1],split[2])
 			data := kademlia.storage.Get(split[1])
 			fmt.Println("STORING DATA, DATA: "+string(data)+" HASH: "+string(split[1])+" Address: "+kademlia.nt.rt.me.String())
+			go kademlia.nt.SendStoreDataAcceptedMessage(&contact,string(split[1]),data)
+		} else if bytes.Contains(b, []byte("DataAccepted<")) {
+			var newdata []byte = b[13:]
+			newstring := string(newdata)
+			fmt.Println(newstring)
+			split := strings.Split(newstring, ">")
+			stringarr := strings.Split(split[0][8:(len(split[0])-1)], ",")
+			id := stringarr[0]
+			address := strings.Split(stringarr[1][1:], ")")
+			contact := NewContact(NewKademliaID(id),address[0])
+			fmt.Println("ACCEPTED DATA, DATA: "+string(split[2])+" HASH: "+string(split[1])+" Address: "+contact.String())
 		} else if bytes.Contains(b, []byte("Join<")) {
 			var newdata []byte = b[5:]
 			newstring := string(newdata)
