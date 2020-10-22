@@ -119,6 +119,8 @@ func (kademlia *Kademlia) LookupData(hash string) {
 
 func (kademlia *Kademlia) Store(hash string, data []byte) {
 	contact := NewContact(NewKademliaID(hash),"localhost:0000")
+	fmt.Println("Hash: "+hash)
+	fmt.Println("Data: "+string(data))
 	kademlia.LookupContact(&contact,&kademlia.nt.rt.me)
 	for {if (kademlia.firstrun == true) {break}}
 	newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,k)
