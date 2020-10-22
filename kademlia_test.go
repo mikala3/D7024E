@@ -311,6 +311,8 @@ func TestStoreModule(t *testing.T) {
 	sender := NewRandomKademliaID()
 	time.Sleep(2 * time.Millisecond)
 	hash := NewRandomKademliaID()
+	time.Sleep(2 * time.Millisecond)
+	rand := NewRandomKademliaID()
 
 	rt := NewRoutingTable(NewContact(sender, "localhost:"+port))
 
@@ -321,8 +323,20 @@ func TestStoreModule(t *testing.T) {
 
 	ka := NewKademlia(nt)
 	ka.storage.Store(hash.String(),"TestStore")
+	ka.storage.Store(rand.String(),"WrongStore")
 	data := ka.storage.Get(hash.String())
+	fmt.Println("Data: "+string(data))
+	data2 := ka.storage.Get(rand.String())
 	if (string(data) != "TestStore") {
+		t.Errorf("TestStoreModule test failed: data "+string(data))
+	}
+	if (string(data2) == "TestStore") {
+		t.Errorf("TestStoreModule test failed: data "+string(data))
+	}
+	if (string(data) == "WrongStore") {
+		t.Errorf("TestStoreModule test failed: data "+string(data))
+	}
+	if (string(data2) == "TestStore") {
 		t.Errorf("TestStoreModule test failed: data "+string(data))
 	} else {
 		t.Logf("Success store module test")

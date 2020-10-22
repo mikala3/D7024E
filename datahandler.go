@@ -70,6 +70,8 @@ func (kademlia *Kademlia) DataHandler() {
 			fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
 			kademlia.storage.Store(split[1],split[2])
+			data := kademlia.storage.Get(split[1])
+			fmt.Println(string(data))
 		} else if bytes.Contains(b, []byte("Join<")) {
 			var newdata []byte = b[5:]
 			newstring := string(newdata)
