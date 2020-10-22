@@ -1,4 +1,5 @@
 sudo docker service rm test
 sudo docker service rm swarm_kademliaNodes
 sudo docker swarm leave --force
+sudo docker rm $(sudo docker ps -aq)
 sudo docker rmi $(sudo docker images -q)
