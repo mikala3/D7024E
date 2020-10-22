@@ -85,16 +85,16 @@ func main() {
 	nt := NewNetwork(rt,kc,ex)
 
 	ownip := nt.GetIpAddress()
-	if (ownip == "") {
+
+	ka := NewKademlia(nt)
+
+	ka.nt.rt.me.Address = ownip+":8000"
+
+	if (ka.nt.rt.me.Address == ":8000") {
 		fmt.Println("Own ip failed")
 	} else {
 		fmt.Println("Own ip: "+ownip)
 	}
-	
-
-	ka := NewKademlia(nt)
-
-	ka.nt.rt.me.Address = ownip
 
 	// iport, err := strconv.Atoi(port)
 	// if err != nil {
@@ -103,7 +103,7 @@ func main() {
 
 	go nt.Listen(8000)
 	go ka.DataHandler()
-	addressToJoin := ka.nt.GetIpToJoin()
+	addressToJoin := "10.0.0.5:8000"
 	fmt.Println("Address to join: "+addressToJoin)
 	if (addressToJoin != "") {
 		fmt.Println("Attemting to join "+addressToJoin)
