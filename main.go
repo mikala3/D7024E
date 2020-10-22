@@ -107,7 +107,7 @@ func main() {
 	fmt.Println("Address to join: "+addressToJoin)
 	if (addressToJoin != "") {
 		fmt.Println("Attemting to join "+addressToJoin)
-		go ka.nt.SendJoinMessage(addressToJoin+":8000")
+		go ka.nt.SendJoinMessage(addressToJoin)
 	}
 	command(ka,true)
 }
