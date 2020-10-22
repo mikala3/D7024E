@@ -75,7 +75,7 @@ func main() {
 	
 	// fmt.Scanln(&port) 
 	// fmt.Println("jada")
-	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), "localhost:"+"8000"))
+	rt := NewRoutingTable(NewContact(NewRandomKademliaID(), GetIpAddress()+"8000"))
 
 	kc := make(chan []byte)
 	ex := make(chan []byte)
@@ -90,6 +90,9 @@ func main() {
 
 	go nt.Listen(8000)
 	go ka.DataHandler()
-	//go ka.nt.SendJoinMessage("localhost:5001")
+	addressToJoin := ka.nt.GetIpToJoin()
+	if (addressToJoin != "") {
+		go ka.nt.SendJoinMessage(addressToJoin+":8000")
+	}
 	command(ka)
 }

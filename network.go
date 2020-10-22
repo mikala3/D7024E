@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"fmt"
+	"os/exec"
 )
 
 type Network struct {
@@ -25,6 +26,25 @@ func NewNetwork(rt *RoutingTable, kc chan []byte, ex chan []byte) *Network {
 	network.testing = false
 	network.terminate = false
 	return network
+}
+
+func GetIpAddress() string {
+	command, err := exec.Command("awk 'END{print $1}' /etc/hosts").Output()
+	if (err != nil) {
+		return ""
+	}
+	return string(command)
+}
+
+func (network *Network) GetIpToJoin() string {
+	command, err := exec.Command("ping swarm_kademliaNodes.1 | jq '.ip'").Output()
+	if (err != nil) {
+		return ""
+	}
+	if (string(command) == network.rt.me.Address) {
+		return ""
+	}
+	return string(command)
 }
 
 func (network *Network) ListenToIp(ip string, port int) {
