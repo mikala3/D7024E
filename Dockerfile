@@ -14,12 +14,14 @@
 
 FROM golang:alpine
 
-RUN mkdir /app
-ADD . /app/
-WORKDIR /app
-RUN go build -o main .
 USER root
 RUN apk update
 RUN apk add gawk
 RUN apk add jq
+RUN mkdir /app
+ADD . /app/
+WORKDIR /app
+RUN go build -o main .
+
+
 CMD ["./main"]
