@@ -24,7 +24,7 @@ services:
         max_attempts: 3
         window: 10s
     ports:
-      - "8000:8000-8080"
+      - "8000-8080:8000"
     networks:
       - kademlia_network
       
