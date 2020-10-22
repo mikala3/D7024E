@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-const alpha = 3
-const k = 4
+const alpha = 5
+const k = 6
 
 type Kademlia struct {
 	nt *Network
@@ -112,10 +112,8 @@ func (kademlia *Kademlia) LookupData(hash string) {
 		fmt.Println(kademlia.storage.Get(hash))
 	} else {
 		contact := NewContact(NewKademliaID(hash),"localhost:0000")
-		newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,k)
-		for co := 0; co < len(newclosest); co++ {
-			kademlia.nt.SendLookupDataMessage(&newclosest[co],&kademlia.nt.rt.me,hash)
-		}
+		newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,0)
+		kademlia.nt.SendLookupDataMessage(&newclosest[0],&kademlia.nt.rt.me,hash)
 		
 	}
 }
