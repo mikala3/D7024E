@@ -109,7 +109,7 @@ func (kademlia *Kademlia) LookupContactAccepted(target *Contact, sender *Contact
 
 func (kademlia *Kademlia) LookupData(hash string) {
 	if (kademlia.storage.Check(hash)) {
-		fmt.Println(kademlia.storage.Get(hash))
+		fmt.Println(string(kademlia.storage.Get(hash)))
 	} else {
 		contact := NewContact(NewKademliaID(hash),"localhost:0000")
 		newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
