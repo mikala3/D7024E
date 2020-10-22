@@ -19,6 +19,6 @@ ADD . /app/
 WORKDIR /app
 RUN go build -o main .
 USER root
-RUN apt-get install awk
-RUN apt-get install hostname
+RUN apk add awk
+RUN apk add hostname
 CMD ["./main"]
