@@ -121,6 +121,9 @@ func (kademlia *Kademlia) Store(hash string, data []byte) {
 	contact := NewContact(NewKademliaID(hash),"localhost:0000")
 	fmt.Println("Hash: "+hash)
 	fmt.Println("Data: "+string(data))
+	kademlia.index = 0
+	kademlia.kaalpha = 0
+	kademlia.firstrun = true
 	kademlia.LookupContact(&contact,&kademlia.nt.rt.me)
 	for {if (kademlia.firstrun == true) {break}}
 	newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,k)
@@ -141,6 +144,9 @@ func (kademlia *Kademlia) Join(ip string, id string) {
 
 func (kademlia *Kademlia) JoinAccepted(ip string, id string) {
 	kademlia.nt.rt.AddContact(NewContact(NewKademliaID(id), ip))
+	kademlia.index = 0
+	kademlia.kaalpha = 0
+	kademlia.firstrun = true
 	kademlia.LookupContact(&kademlia.nt.rt.me,&kademlia.nt.rt.me)
 }
 

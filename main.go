@@ -38,6 +38,9 @@ func command(k *Kademlia, testing bool) {
 			var ip string 
 			fmt.Scanln(&ip)
 			var contact = NewContact(NewKademliaID(id),ip)
+			k.index = 0
+			k.kaalpha = 0
+			k.firstrun = true
 			go k.LookupContact(&contact, &k.nt.rt.me)
 		} else if (cmd == "-put") {
 			fmt.Println("Enter content to store: ") 
