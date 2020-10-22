@@ -51,8 +51,11 @@ func (kademlia *Kademlia) DataHandler() {
 			fmt.Println(split[2])
 			if (kademlia.storage.Check(split[2])) {
 				data := kademlia.storage.Get(split[2])
+				fmt.Println("Passed data: "+string(data))
 				kademlia.nt.SendFoundDataMessage(&contactarr[1],split[2],data)
 			} else {
+				data := kademlia.storage.Get(split[2])
+				fmt.Println("Failed data: "+string(data))
 				contact := NewContact(NewKademliaID(split[2]),"localhost:0000")
 				newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
 				if (!newclosest[0].ID.Equals(kademlia.nt.rt.me.ID)) {
