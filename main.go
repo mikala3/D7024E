@@ -27,7 +27,7 @@ func command(k *Kademlia, testing bool) {
 			fmt.Println("Enter ip: ") 
 			var ip string 
 			fmt.Scanln(&ip) 
-			k.nt.SendJoinMessage(ip)
+			go k.nt.SendJoinMessage(ip)
 		} else if (cmd == "-ping") {
 			k.nt.SendPingAll();
 		} else if (cmd == "-lookup") {
@@ -38,18 +38,18 @@ func command(k *Kademlia, testing bool) {
 			var ip string 
 			fmt.Scanln(&ip)
 			var contact = NewContact(NewKademliaID(id),ip)
-			k.LookupContact(&contact, &k.nt.rt.me)
+			go k.LookupContact(&contact, &k.nt.rt.me)
 		} else if (cmd == "-put") {
 			fmt.Println("Enter content to store: ") 
 			var data string 
 			fmt.Scanln(&data) 
 			hash := NewRandomKademliaID()
-			k.Store(hash.String(),([]byte(data)))
+			go k.Store(hash.String(),([]byte(data)))
 		} else if (cmd == "-get") {
 			fmt.Println("Enter the hash: ") 
 			var hash string 
 			fmt.Scanln(&hash)
-			k.LookupData(hash) 
+			go k.LookupData(hash) 
 		} else if (cmd == "-exit") {
 			k.nt.terminate = true //Stop listen loop
 			k.nt.kademliaChannel <- ([]byte("+TERMINATE+")) //Stop datahandler
