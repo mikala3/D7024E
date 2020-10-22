@@ -95,6 +95,7 @@ func main() {
 	go ka.DataHandler()
 	addressToJoin := ka.nt.GetIpToJoin()
 	if (addressToJoin != "") {
+		fmt.Println("Attemting to join"+addressToJoin)
 		go ka.nt.SendJoinMessage(addressToJoin+":8000")
 	}
 	command(ka,true)
