@@ -125,6 +125,7 @@ func (kademlia *Kademlia) Store(hash string, data []byte) {
 	for {if (kademlia.firstrun == true) {break}}
 	newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,k)
 	for co := 0; co < len(newclosest); co++ {
+		fmt.Println("Sending data to: "+newclosest[co].String())
 		kademlia.nt.SendStoreDataMessage(&newclosest[co],hash,data)
 	}
 }
