@@ -85,7 +85,12 @@ func main() {
 	nt := NewNetwork(rt,kc,ex)
 
 	ownip := nt.GetIpAddress()
-	fmt.Println("Own ip: "+ownip)
+	if (ownip == "") {
+		fmt.Println("Own ip failed")
+	} else {
+		fmt.Println("Own ip: "+ownip)
+	}
+	
 
 	ka := NewKademlia(nt)
 
