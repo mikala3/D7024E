@@ -19,5 +19,7 @@ ADD . /app/
 WORKDIR /app
 RUN go build -o main .
 USER root
+RUN apk update
 RUN apk add gawk
+RUN apk add jq
 CMD ["./main"]
