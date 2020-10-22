@@ -19,6 +19,5 @@ ADD . /app/
 WORKDIR /app
 RUN go build -o main .
 USER root
-RUN apk add awk
-RUN apk add hostname
+RUN apk add gawk
 CMD ["./main"]
