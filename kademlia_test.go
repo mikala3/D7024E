@@ -456,6 +456,8 @@ func TestKademliaEqual(t *testing.T) {
 	Id1 := NewRandomKademliaID()
 	time.Sleep(2 * time.Millisecond)
 	Id2 := NewRandomKademliaID()
+	Id3 := NewKademliaID(Id2.String())
+
 
 	if (Id1.Equals(Id2)) {
 		t.Errorf("TestKademliaEqual test failed")
@@ -467,6 +469,9 @@ func TestKademliaEqual(t *testing.T) {
 		t.Errorf("TestKademliaEqual test failed")
 	}
 	if (!Id2.Equals(Id2)) {
+		t.Errorf("TestKademliaEqual test failed")
+	}
+	if (!Id2.Equals(Id3)) {
 		t.Errorf("TestKademliaEqual test failed")
 	} else {
 		t.Logf("Success kademlia same test")

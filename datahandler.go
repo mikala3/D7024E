@@ -52,7 +52,7 @@ func (kademlia *Kademlia) DataHandler() {
 			if (kademlia.storage.Check(string(split[2]))) {
 				data := kademlia.storage.Get(string(split[2]))
 				fmt.Println("Passed data: "+string(data))
-				kademlia.nt.SendFoundDataMessage(&contactarr[1],split[2],data)
+				go kademlia.nt.SendFoundDataMessage(&contactarr[1],split[2],data)
 			} else {
 				data := kademlia.storage.Get(string(split[2]))
 				contact := NewContact(NewKademliaID(split[2]),"localhost:0000")
@@ -60,7 +60,7 @@ func (kademlia *Kademlia) DataHandler() {
 				if ((!newclosest[0].ID.Equals(kademlia.nt.rt.me.ID)) || (!newclosest[0].ID.Equals(contactarr[1].ID))) { //No looping back to ourself and contact searching for data
 					fmt.Println(newstring)
 					fmt.Println("Failed data: "+string(data)+ " hash: "+string(split[2]))
-					kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],split[2])
+					go kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],split[2])
 				}
 			}
 		} else if bytes.Contains(b, []byte("FoundData<")) {
