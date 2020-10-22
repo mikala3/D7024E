@@ -12,7 +12,7 @@
 #
 # $ docker build . -t kadlab
 
-FROM golang:latest
+FROM alpine:latest
 
 RUN mkdir /app
 ADD . /app/
