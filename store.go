@@ -4,9 +4,10 @@ type Storage struct {
 	str map[string][]byte
 }
 
-func NewStorage(str map[string][]byte) *Storage {
+func NewStorage() *Storage {
 	storage := &Storage{}
-	storage.str = str
+	m := make(map[string][]byte)
+	storage.str = m
 	return storage
 }
 

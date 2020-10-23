@@ -29,8 +29,7 @@ func NewKademlia(nt *Network) *Kademlia {
 	//kademlia.ping = false;
 	kademlia.index = 0;
 	kademlia.kaalpha = 0;
-	m := make(map[string][]byte)
-	kademlia.storage = NewStorage(m)
+	kademlia.storage = NewStorage()
 	return kademlia
 }
 
