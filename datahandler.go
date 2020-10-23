@@ -53,7 +53,7 @@ func (kademlia *Kademlia) DataHandler() {
 			if (kademlia.storage.Check(string(hash))) {
 				data := kademlia.storage.Get(string(hash))
 				fmt.Println("Passed data: "+string(data))
-				go kademlia.nt.SendFoundDataMessage(&contactarr[1],split[2],data)
+				go kademlia.nt.SendFoundDataMessage(&contactarr[1],hash,data)
 			} else {
 				data := kademlia.storage.Get(string(hash))
 				contact := NewContact(NewKademliaID(hash),"localhost:0000")
@@ -67,6 +67,7 @@ func (kademlia *Kademlia) DataHandler() {
 		} else if bytes.Contains(b, []byte("FoundData<")) {
 			contactarr := parseTwoContacts(b,10);
 			newstring := string(b)
+			fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
 			fmt.Println("Got data from: "+contactarr[1].String() + " Hash: "+split[2]+" Data: "+split[3]) 
 		} else if bytes.Contains(b, []byte("Data<")) {
