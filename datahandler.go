@@ -49,11 +49,11 @@ func (kademlia *Kademlia) DataHandler() {
 			//fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
 			hash := split[2][:40]
-			if (kademlia.storage.Check(string(hash))) {
+			if (kademlia.storage.Check(string(hash))) { 																//Data is foound, sent it back to node looking.
 				data := kademlia.storage.Get(string(hash))
 				fmt.Println("Passed data: "+string(data))
 				go kademlia.nt.SendFoundDataMessage(&contactarr[1],hash,data)
-			} else {
+			} else {																									//Data is not found, send along to other node (using distance calc).
 				data := kademlia.storage.Get(string(hash))
 				contact := NewContact(NewKademliaID(hash),"localhost:0000")
 				newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
