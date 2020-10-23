@@ -48,18 +48,19 @@ func (kademlia *Kademlia) DataHandler() {
 			newstring := string(b)
 			//fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
+			hash := split[2][:20]
 			//fmt.Println(split[2])
-			if (kademlia.storage.Check(string(split[2]))) {
-				data := kademlia.storage.Get(string(split[2]))
+			if (kademlia.storage.Check(string(hash))) {
+				data := kademlia.storage.Get(string(hash))
 				fmt.Println("Passed data: "+string(data))
 				go kademlia.nt.SendFoundDataMessage(&contactarr[1],split[2],data)
 			} else {
-				data := kademlia.storage.Get(string(split[2]))
-				contact := NewContact(NewKademliaID(split[2]),"localhost:0000")
+				data := kademlia.storage.Get(string(hash))
+				contact := NewContact(NewKademliaID(hash),"localhost:0000")
 				newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
 				if ((!newclosest[0].ID.Equals(kademlia.nt.rt.me.ID)) || (!newclosest[0].ID.Equals(contactarr[1].ID))) { //No looping back to ourself and contact searching for data
 					fmt.Println(newstring)
-					fmt.Println("Failed data: "+string(data)+ " hash: "+string(split[2])+"##ENDS##")
+					fmt.Println("Failed data: "+string(data)+ " hash: "+string(hash)+"##ENDS##")
 					go kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],split[2])
 				}
 			}
