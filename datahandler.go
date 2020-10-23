@@ -61,7 +61,7 @@ func (kademlia *Kademlia) DataHandler() {
 				if ((!newclosest[0].ID.Equals(kademlia.nt.rt.me.ID)) || (!newclosest[0].ID.Equals(contactarr[1].ID))) { //No looping back to ourself and contact searching for data
 					fmt.Println(newstring)
 					fmt.Println("Failed data: "+string(data)+ " hash: "+string(hash)+"##ENDS##")
-					go kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],split[2])
+					go kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],hash)
 				}
 			}
 		} else if bytes.Contains(b, []byte("FoundData<")) {
