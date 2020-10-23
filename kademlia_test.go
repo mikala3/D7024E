@@ -488,3 +488,42 @@ func TestKademliaEqual(t *testing.T) {
 		t.Logf("Success kademlia same test")
 	}
 }
+
+func TestContacts(t *testing.T) {
+	senderId := NewKademliaID("0000000000000000000000000000000000000001")
+	Id1 := NewKademliaID("0000000000000000000000000000000000000000")
+	sender := NewContact(senderId, "localhost:8080")
+	Contact1 := NewContact(Id1, "localhost:8080")
+	sender.CalcDistance(Id1)
+	Contact1.CalcDistance(Id1)
+	if (!sender.distance.Equals(NewKademliaID("0000000000000000000000000000000000000001"))) {
+		t.Errorf("TestContacts test failed")
+	}
+	if (sender.Less(&Contact1)) {
+		t.Errorf("TestContacts test failed")
+	}
+}
+
+func TestBucketLen(t *testing.T) {
+	bucket := newBucket()
+	if (bucket.Len() != 0) {
+		t.Errorf("TestBucketLen test failed")
+	}
+	Id1 := NewRandomKademliaID()
+	Id1Contact := NewContact(Id1, "localhost:8080")
+	bucket.AddContact(Id1Contact)
+	if (bucket.Len() != 1) {
+		t.Errorf("TestBucketLen test failed")
+	}
+}
+
+func TestGetFirst(t *testing.T) {
+	bucket := newBucket()
+	Id1 := NewRandomKademliaID()
+	Id1Contact := NewContact(Id1, "localhost:8080")
+	bucket.AddContact(Id1Contact)
+	contactFromBucket := bucket.GetFirst()
+	if (!contactFromBucket.ID.Equals(Id1Contact.ID)) {
+		t.Errorf("TestGetFirst test failed")
+	}
+}
