@@ -27,7 +27,7 @@ func command(k *Kademlia, testing bool) {
 			fmt.Println("Enter ip: ") 
 			var ip string 
 			fmt.Scanln(&ip) 
-			go k.nt.SendJoinMessage(ip)
+			go k.Join(ip)
 		} else if (cmd == "-ping") {
 			k.nt.SendPingAll();
 		} else if (cmd == "-lookup") {
@@ -115,7 +115,7 @@ func main() {
 	time.Sleep(10 * time.Second)
 	if (addressToJoin != "") {
 		//fmt.Println("Attemting to join "+addressToJoin)
-		go ka.nt.SendJoinMessage(addressToJoin)
+		go ka.Join(addressToJoin)
 	}
 	command(ka,false)
 }

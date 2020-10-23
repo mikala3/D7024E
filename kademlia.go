@@ -138,7 +138,11 @@ func (kademlia *Kademlia) Ping(target *Contact, sender *Contact) {
 	go kademlia.nt.SendPingMessage(target, sender)
 }
 
-func (kademlia *Kademlia) Join(ip string, id string) {
+func (kademlia *Kademlia) Join(ip string) {
+	kademlia.nt.SendJoinMessage(ip)
+}
+
+func (kademlia *Kademlia) JoinRecivied(ip string, id string) {
 	kademlia.nt.rt.AddContact(NewContact(NewKademliaID(id), ip))
 	kademlia.nt.SendJoinAcceptedMessage(ip)
 }

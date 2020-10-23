@@ -98,7 +98,7 @@ func (kademlia *Kademlia) DataHandler() {
 			stringarr := strings.Split(newstring[8:(len(newstring)-1)], ",")
 			id := stringarr[0]
 			address := strings.Split(stringarr[1][1:], ")")
-			go kademlia.Join(address[0], id)
+			go kademlia.JoinRecivied(address[0], id)
 		} else if bytes.Contains(b, []byte("JoinAccepted<")) {
 			var newdata []byte = b[13:]
 			newstring := string(newdata)
