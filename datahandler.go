@@ -48,7 +48,7 @@ func (kademlia *Kademlia) DataHandler() {
 			newstring := string(b)
 			//fmt.Println(newstring)
 			split := strings.Split(newstring, ">")
-			hash := split[2][:20]
+			hash := split[2][:40]
 			//fmt.Println(split[2])
 			if (kademlia.storage.Check(string(hash))) {
 				data := kademlia.storage.Get(string(hash))
