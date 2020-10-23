@@ -118,7 +118,7 @@ func (kademlia *Kademlia) LookupData(hash string) {
 	}
 }
 
-func (kademlia *Kademlia) Store(hash string, data []byte) {
+func (kademlia *Kademlia) Store(hash string, data string) {
 	contact := NewContact(NewKademliaID(hash),"localhost:0000")
 	fmt.Println("Hash: "+hash)
 	fmt.Println("Data: "+string(data))

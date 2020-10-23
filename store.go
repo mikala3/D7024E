@@ -1,19 +1,18 @@
 package main
 
 type Storage struct {
-	str map[string][]byte
+	str map[string]string
 }
 
 func NewStorage() *Storage {
 	storage := &Storage{}
-	m := make(map[string][]byte)
+	m := make(map[string]string)
 	storage.str = m
 	return storage
 }
 
 func (storage *Storage) Store(hash string, data string) {
-	bytearr := []byte(data)
-	storage.str[hash] = bytearr
+	storage.str[hash] = data
 }
 
 func (storage *Storage) Check(hash string) bool {
@@ -24,7 +23,7 @@ func (storage *Storage) Check(hash string) bool {
 	return true
 }
 
-func (storage *Storage) Get(hash string) []byte {
+func (storage *Storage) Get(hash string) string {
 	check := storage.str[hash]
 	return check
 }

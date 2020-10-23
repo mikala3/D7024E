@@ -47,7 +47,7 @@ func command(k *Kademlia, testing bool) {
 			var data string 
 			fmt.Scanln(&data) 
 			hash := NewRandomKademliaID()
-			go k.Store(hash.String(),([]byte(data)))
+			go k.Store(hash.String(),data)
 		} else if (cmd == "-get") {
 			fmt.Println("Enter the hash: ") 
 			var hash string 

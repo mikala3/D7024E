@@ -178,11 +178,14 @@ func TestStoreObjects(t *testing.T) {
 	go ka.DataHandler()
 
 	ka.nt.kademliaChannel <- ([]byte("Data<contact("+recivier.String()+", localhost:8085)>"+hash.String()+">dettaardata"))
-
-	ka.nt.kademliaChannel <- ([]byte("FindData<contact("+sender.String()+", localhost:8080)>contact("+recivier.String()+", localhost:8085)>"+hash.String()))
 	msg := <- ka.nt.externalChannel
-	if (!reflect.DeepEqual(msg, ([]byte("FoundData<contact("+recivier.String()+", localhost:8085)>contact("+sender.String()+", localhost:8080)>"+hash.String()+">dettaardata")))) {
+	if (!reflect.DeepEqual(msg, ([]byte("DataAccepted<contact("+sender.String()+", localhost:8080)>"+hash.String()+">dettaardata")))) {
 		t.Errorf("Store test failed"+string(msg))
+	} 
+	ka.nt.kademliaChannel <- ([]byte("FindData<contact("+sender.String()+", localhost:8080)>contact("+recivier.String()+", localhost:8085)>"+hash.String()))
+	msg2 := <- ka.nt.externalChannel
+	if (!reflect.DeepEqual(msg2, ([]byte("FoundData<contact("+recivier.String()+", localhost:8085)>contact("+sender.String()+", localhost:8080)>"+hash.String()+">dettaardata")))) {
+		t.Errorf("Store test failed"+string(msg2))
 	} else {
 		t.Logf("Success store test")
 	}
@@ -239,7 +242,7 @@ func TestFullStore(t *testing.T) {
 
 	go ka.DataHandler()
 
-	go ka.Store(rtContactId.String(), ([]byte("supersecret")))
+	go ka.Store(rtContactId.String(), "supersecret")
 
 	msg := <- ka.nt.externalChannel
 	if (!reflect.DeepEqual(msg, ([]byte("Find<contact("+rtContactId.String()+", localhost:0000)>contact("+sender.String()+", localhost:8080)")))) {

@@ -257,7 +257,7 @@ func (network *Network) SendLookupDataMessage(contact *Contact, sender *Contact,
 	} 
 }
 
-func (network *Network) SendFoundDataMessage(contact *Contact, hash string, data []byte) {
+func (network *Network) SendFoundDataMessage(contact *Contact, hash string, data string) {
 	if (network.testing) {
 		dataString := string(data)
 		network.externalChannel <- ([]byte("FoundData<"+contact.String()+">"+network.rt.me.String()+">"+hash+">"+dataString))
@@ -278,7 +278,7 @@ func (network *Network) SendFoundDataMessage(contact *Contact, hash string, data
 }
 
 //Needs more work later, need to match with data to find if we are close enough with hash
-func (network *Network) SendStoreDataMessage(contact *Contact, hash string, data []byte) {
+func (network *Network) SendStoreDataMessage(contact *Contact, hash string, data string) {
 	if (network.testing) {
 		dataString := string(data)
 		network.externalChannel <- ([]byte("Data<"+network.rt.me.String()+">"+hash+">"+dataString))
@@ -299,7 +299,7 @@ func (network *Network) SendStoreDataMessage(contact *Contact, hash string, data
 
 }
 
-func (network *Network) SendStoreDataAcceptedMessage(contact *Contact, hash string, data []byte) {
+func (network *Network) SendStoreDataAcceptedMessage(contact *Contact, hash string, data string) {
 	if (network.testing) {
 		dataString := string(data)
 		network.externalChannel <- ([]byte("DataAccepted<"+network.rt.me.String()+">"+hash+">"+dataString))

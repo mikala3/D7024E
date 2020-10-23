@@ -59,7 +59,7 @@ func (kademlia *Kademlia) DataHandler() {
 				newclosest := kademlia.nt.rt.FindClosestContacts(contact.ID,1)
 				if ((!newclosest[0].ID.Equals(kademlia.nt.rt.me.ID)) || (!newclosest[0].ID.Equals(contactarr[1].ID))) { //No looping back to ourself and contact searching for data
 					fmt.Println(newstring)
-					fmt.Println("Failed data: "+string(data)+ " hash: "+string(split[2]))
+					fmt.Println("Failed data: "+string(data)+ " hash: "+string(split[2])+"##ENDS##")
 					go kademlia.nt.SendLookupDataMessage(&newclosest[0],&contactarr[1],split[2])
 				}
 			}
@@ -77,7 +77,7 @@ func (kademlia *Kademlia) DataHandler() {
 			id := stringarr[0]
 			address := strings.Split(stringarr[1][1:], ")")
 			contact := NewContact(NewKademliaID(id),address[0])
-			kademlia.storage.Store(split[1],split[2])
+			kademlia.storage.Store(string(split[1]),string(split[2]))
 			data := kademlia.storage.Get(split[1])
 			fmt.Println("STORING DATA, DATA: "+string(data)+" HASH: "+string(split[1])+" Address: "+kademlia.nt.rt.me.String())
 			go kademlia.nt.SendStoreDataAcceptedMessage(&contact,string(split[1]),data)
